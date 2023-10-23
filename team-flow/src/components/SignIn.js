@@ -74,7 +74,7 @@ export default function SignIn() {
                     className="form-control-lg"
                     type="password"
                     ref={passwordRef}
-                    placeholder="***** ***"
+                    placeholder="********"
                     required
                   />
                 </Form.Group>
@@ -89,10 +89,10 @@ export default function SignIn() {
               </Form>
             </div>
             <div className="w-100 text-center mt-2">
-            Forgot your password? <Link to='/reset-password' className="fw-bold">Reset password</Link>
+            Forgot your password? <Link to='/reset-password'>Reset password</Link>
             </div>
             <div className="w-100 text-center mt-2">
-            Need an account? <Link to='/sign-up' className="fw-bold">Sign Up</Link>
+            Need an account? <Link to='/sign-up'>Sign Up</Link>
             </div>
           </div>
         </Col>

@@ -11,8 +11,13 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   function signup(email, password) {
-    return auth.createUserWithEmailAndPassword(email, password);
+    return auth.createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        // wysyła e-mail weryfikacyjny
+        return userCredential.user.sendEmailVerification({url: "http://localhost:3000/verify"});
+      });
   }
+
   function login(email, password) {
     return auth.signInWithEmailAndPassword(email, password);
   }
@@ -22,6 +27,18 @@ export function AuthProvider({ children }) {
 
   function resetPassword(email){
     return auth.sendPasswordResetEmail(email)
+  }
+
+  function isEmailVerified() {
+    const user = auth.currentUser;
+    return user ? user.emailVerified : false;
+  }
+
+  function sendVerificationEmail() {
+    const user = auth.currentUser;
+    if (user) {
+      return user.sendEmailVerification({url: "http://localhost:3000/verify"});
+    }
   }
 
   useEffect(()=>{
@@ -38,7 +55,9 @@ export function AuthProvider({ children }) {
     login,
     signup, 
     logout,
-    resetPassword
+    resetPassword,
+    isEmailVerified,
+    sendVerificationEmail  
   };
 
   return (<AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>)
