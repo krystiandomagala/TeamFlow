@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { ReactComponent as Image } from "../assets/undraw_working.svg";
 import { ReactComponent as Icon } from "../assets/app_icon.svg";
 import { Link } from "react-router-dom";
+import BackgroundContainer from "./BackgroundContainer";
 
 export default function ResetPassword() {
   const emailRef = useRef();
@@ -29,28 +30,11 @@ export default function ResetPassword() {
   }
 
   return (
-    <Container fluid className="app-container" style={{ height: "100vh" }}>
-      <Row className="align-items-center h-100">
-        <Col
-          xs={12}
-          md={6}
-          className="d-flex justify-content-center align-items-center bg-primary h-100 p-5"
-        >
-          <Icon
-            className="position-absolute"
-            style={{ left: "30px", top: "30px" }}
-          />
-          <Image />
-        </Col>
-        <Col
-          xs={12}
-          md={6}
-          className="d-flex justify-content-center align-items-center p-5"
-        >
+<BackgroundContainer>
           <div className="w-100" style={{ maxWidth: "600px" }}>
             <div>
               <h1 className="text-center mb-2">Reset your password</h1>
-              <p className="text-center mb-4">
+              <p className="text-center mb-4 subtitle">
                 Enter the email address associated with your account and we’ll
                 send you a link to reset your password.
               </p>
@@ -58,7 +42,7 @@ export default function ResetPassword() {
               {message && <Alert variant="success">{message}</Alert>}
               <Form onSubmit={handleSubmit}>
                 <Form.Group id="email" className="my-3">
-                  <Form.Label>Work Email</Form.Label>
+                  <Form.Label className="label-text">Work Email</Form.Label>
                   <Form.Control
                     className="form-control-lg"
                     type="email"
@@ -79,13 +63,12 @@ export default function ResetPassword() {
             </div>
 
             <div className="w-100 text-center mt-2">
-              <Link to="/sign-in" className="fw-bold">
+              <Link to="/sign-in">
                 Sign In
               </Link>
             </div>
           </div>
-        </Col>
-      </Row>
-    </Container>
+</BackgroundContainer>
+
   );
 }

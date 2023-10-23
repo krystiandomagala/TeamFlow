@@ -3,7 +3,14 @@ import { Container, Col, Row, Form, Button, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { ReactComponent as Image } from "../assets/undraw_working.svg";
 import { ReactComponent as Icon } from "../assets/app_icon.svg";
+import { ReactComponent as Eye } from "../assets/eye.svg";
+import { ReactComponent as EyeSlash } from "../assets/eye-slash.svg";
 import { Link, useNavigate } from 'react-router-dom'
+import {
+  handleMouseDown,
+  handleMouseUp,
+  validatePassword,
+} from "../passwordUtils";
 
 export default function SignIn() {
   const fullNameRef = useRef();
@@ -12,8 +19,11 @@ export default function SignIn() {
   const { login } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   const navigate = useNavigate()
 
+  
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -52,14 +62,14 @@ export default function SignIn() {
           <div className="w-100" style={{ maxWidth: "600px" }}>
             <div>
               <h1 className="text-center mb-2">Sign In</h1>
-              <p className="text-center mb-4">
+              <p className="text-center mb-4 subtitle">
               Sign in to your account to start working in your team. 
               </p>
               {error && <Alert variant="danger">{error}</Alert>}
               <Form onSubmit={handleSubmit}>
 
                 <Form.Group id="email" className="my-3">
-                  <Form.Label>Work Email</Form.Label>
+                  <Form.Label className="label-text">Work Email</Form.Label>
                   <Form.Control
                     className="form-control-lg"
                     type="email"
@@ -68,15 +78,22 @@ export default function SignIn() {
                     required
                   />
                 </Form.Group>
-                <Form.Group id="password" className="my-3">
-                  <Form.Label>Your password</Form.Label>
+                <Form.Group id="password" className="my-3 input-with-icon-container">
+                  <Form.Label className="label-text">Your password</Form.Label>
                   <Form.Control
-                    className="form-control-lg"
-                    type="password"
-                    ref={passwordRef}
-                    placeholder="********"
-                    required
-                  />
+                className="form-control-lg"
+                type={isPasswordVisible ? "text" : "password"}
+                ref={passwordRef}
+                placeholder="********"
+                required
+              />
+              <span
+                onMouseDown={() => handleMouseDown(setIsPasswordVisible)}
+                onMouseUp={() => handleMouseUp(setIsPasswordVisible)}
+                onMouseLeave={() => handleMouseUp(setIsPasswordVisible)} // Tu również używamy handleMouseUp, aby ukryć hasło, gdy użytkownik opuści przycisk myszy
+              >
+                {isPasswordVisible ? <Eye /> : <EyeSlash />}
+              </span>
                 </Form.Group>
                 
                 <Button
@@ -88,10 +105,10 @@ export default function SignIn() {
                 </Button>
               </Form>
             </div>
-            <div className="w-100 text-center mt-2">
+            <div className="w-100 text-center mt-2 subtitle">
             Forgot your password? <Link to='/reset-password'>Reset password</Link>
             </div>
-            <div className="w-100 text-center mt-2">
+            <div className="w-100 text-center mt-2 subtitle">
             Need an account? <Link to='/sign-up'>Sign Up</Link>
             </div>
           </div>

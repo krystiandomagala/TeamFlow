@@ -8,9 +8,8 @@ import BackgroundContainer from "./BackgroundContainer";
 
 export default function EmailVerification() {
     const { sendVerificationEmail, currentUser } = useAuth();
-    const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-
+    const [message, setMessage] = useState("");
     const [error, setError] = useState("");
     const [emailVerified, setEmailVerified] = useState(currentUser.emailVerified);
 
@@ -22,32 +21,24 @@ export default function EmailVerification() {
 
   async function handleSendAgain() {
     try {
+      setError("");
+      setMessage("");
       setLoading(true);
       await sendVerificationEmail();
-      setMessage("Verification email sent again.");
-    } catch {
-      setError("Failed to send verification email.");
+      setMessage("Verification email has been sent again.");
+    } catch (err) {
+      setError(`Failed to send verification email. ${err.message}`);
     }
 
     setLoading(false);
   }
-
-    async function handleSendAgain() {
-      try {
-        await sendVerificationEmail();
-        setMessage("Verification email sent again.");
-      } catch {
-        setError("Failed to send verification email.");
-      }
-  }
-
   return (
     <BackgroundContainer>
           <div className="w-100" style={{ maxWidth: "600px" }}>
             {emailVerified ? (
                     <div>
                         <h1 className="text-center mb-2">Congratulations!</h1>
-                        <p className="text-center mb-4">
+                        <p className="text-center mb-4 subtitle">
                             Your email address has been successfully verified.
                         </p>
                         <div className="w-100 text-center">
@@ -57,14 +48,17 @@ export default function EmailVerification() {
                 ) : (
                     <div>
                         <h1 className="text-center mb-2">We're almost there!</h1>
-                        <p className="text-center mb-4">
+                        <p className="text-center mb-4 subtitle">
                             A verification email has been sent to your email address.
                         </p>
-                        <p className="text-center mb-2">
+                        <p className="text-center mb-2 subtitle">
                             Can't you see our email? 
                         </p>
                         <div className="w-100 text-center">
-                            <Button onClick={handleSendAgain}>Send again</Button>
+                            <Button 
+                            disabled={loading}
+                            className="w-100 mb-3 btn-lg"
+                            onClick={handleSendAgain}>Send again</Button>
                         </div>
                         {message && <Alert variant="success">{message}</Alert>}
                         {error && <Alert variant="danger">{error}</Alert>}

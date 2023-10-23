@@ -7,3 +7,22 @@ body{
 h1{
     font-weight: 900;
 }
+.input-with-icon-container {
+    position: relative;
+  }
+  
+  .input-with-icon-container span {
+    position: absolute;
+    top: 55%;
+    cursor: pointer;
+    right: 18px;
+    display: block;
+  }
+  
+.subtitle{
+    color: #5D5D5B;
+}
+
+.label-text{
+    font-weight: 600;
+}

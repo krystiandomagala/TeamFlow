@@ -20,13 +20,10 @@ function App() {
               </PrivateRoute>
             }
           ></Route>
-          <Route path="/sign-up" element={<SignUp />} />
-          <Route path="/sign-in" element={
-            <RedirectIfLoggedIn>
-              <SignIn />
-            </RedirectIfLoggedIn>
-          } />
-          <Route path="/reset-password" element={<ResetPassword />} />
+
+          <Route path="/sign-in" element={<RedirectIfLoggedIn><SignIn /></RedirectIfLoggedIn>} />
+          <Route path="/sign-up" element={<RedirectIfLoggedIn><SignUp /></RedirectIfLoggedIn>} />
+          <Route path="/reset-password" element={<RedirectIfLoggedIn><ResetPassword /></RedirectIfLoggedIn>} />
           <Route path="/verify" element={
               <PrivateRoute>
                 <EmailVerification />
