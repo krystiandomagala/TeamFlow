@@ -4,8 +4,7 @@ import {
   Button,
   Alert,
   Tooltip,
-  OverlayTrigger,
-  InputGroup,
+  OverlayTrigger
 } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { ReactComponent as Info } from "../assets/info-circle.svg";
@@ -30,7 +29,11 @@ export default function SignUp() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
+    const [isManager, setIsManager] = useState(false);
 
+    const handleChange = (event) => {
+      setIsManager(event.target.value);
+    };
   const navigate = useNavigate();
 
   const passwordTooltip = (
@@ -67,7 +70,7 @@ export default function SignUp() {
     try {
       setError("");
       setLoading(true);
-      await signup(emailRef.current.value, passwordRef.current.value);
+      await signup(emailRef.current.value, passwordRef.current.value, fullNameRef.current.value, isManager);
       if (!isEmailVerified()) {
         navigate("/verify");
         return;
@@ -138,7 +141,7 @@ export default function SignUp() {
 
             <Form.Group
               id="password-confirm"
-              className="my-3 input-with-icon-container"
+              className=" input-with-icon-container"
             >
               <Form.Label className="label-text">Confirm a password</Form.Label>
               <Form.Control
@@ -155,6 +158,27 @@ export default function SignUp() {
               >
                 {isConfirmPasswordVisible ? <Eye /> : <EyeSlash />}
               </span>
+            </Form.Group>
+            <Form.Group className="my-4 d-flex">
+              <Form.Check
+                type="radio"
+                label="I am a team member"
+                name="isManager"
+                id="team_member"
+                value="team_member"
+                checked={isManager === false}
+                onChange={handleChange}
+              />
+              <Form.Check
+                type="radio"
+                label="I am a team manager"
+                id="team_manager"
+                name="isManager"
+                value="team_manager"
+                checked={isManager === true}
+                onChange={handleChange}
+                style={{marginLeft: "20px"}}
+              />
             </Form.Group>
             <Button
               disabled={loading}

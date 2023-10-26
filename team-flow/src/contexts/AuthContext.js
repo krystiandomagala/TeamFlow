@@ -1,5 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
+import firebase from "firebase/compat/app";
+
 const AuthContext = React.createContext();
 
 export function useAuth() {
@@ -10,13 +12,22 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true)
 
-  function signup(email, password) {
+  function signup(email, password, fullName, isManager) {
     return auth.createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
-        // wysyła e-mail weryfikacyjny
-        return userCredential.user.sendEmailVerification({url: "http://localhost:3000/verify"});
+        // Sending the verification email
+        userCredential.user.sendEmailVerification({url: "http://localhost:3000/verify"});
+
+        // Adding the user to Firestore
+        return db.collection("users").doc(userCredential.user.uid).set({
+          uid: userCredential.user.uid,
+          email: email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          isManager: isManager,
+          fullName: fullName
+        });
       });
-  }
+}
 
   function login(email, password) {
     return auth.signInWithEmailAndPassword(email, password);

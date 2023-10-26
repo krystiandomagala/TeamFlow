@@ -1,8 +1,6 @@
 import React, { useRef, useState } from "react";
-import { Container, Col, Row, Form, Button, Alert } from "react-bootstrap";
+import { Form, Button, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
-import { ReactComponent as Image } from "../assets/undraw_working.svg";
-import { ReactComponent as Icon } from "../assets/app_icon.svg";
 import { ReactComponent as Eye } from "../assets/eye.svg";
 import { ReactComponent as EyeSlash } from "../assets/eye-slash.svg";
 import { Link, useNavigate } from 'react-router-dom'
@@ -11,9 +9,9 @@ import {
   handleMouseUp,
   validatePassword,
 } from "../passwordUtils";
+import BackgroundContainer from "./BackgroundContainer";
 
 export default function SignIn() {
-  const fullNameRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
   const { login } = useAuth();
@@ -22,8 +20,6 @@ export default function SignIn() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const navigate = useNavigate()
-
-  
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -41,24 +37,8 @@ export default function SignIn() {
   }
 
   return (
-    <Container fluid className="app-container" style={{ height: "100vh" }}>
-      <Row className="align-items-center h-100">
-        <Col
-          xs={12}
-          md={6}
-          className="d-flex justify-content-center align-items-center bg-primary h-100 p-5"
-        >
-          <Icon
-            className="position-absolute"
-            style={{ left: "30px", top: "30px" }}
-          />
-          <Image />
-        </Col>
-        <Col
-          xs={12}
-          md={6}
-          className="d-flex justify-content-center align-items-center p-5"
-        >
+<BackgroundContainer>
+
           <div className="w-100" style={{ maxWidth: "600px" }}>
             <div>
               <h1 className="text-center mb-2">Sign In</h1>
@@ -112,8 +92,7 @@ export default function SignIn() {
             Need an account? <Link to='/sign-up'>Sign Up</Link>
             </div>
           </div>
-        </Col>
-      </Row>
-    </Container>
+</BackgroundContainer>
+
   );
 }
