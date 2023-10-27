@@ -21,7 +21,7 @@ export default function TopBar() {
 
 
     return (
-        <Navbar className="border-bottom p-3 d-flex align-items-center justify-content-end">
+        <Navbar className="border-bottom  d-flex align-items-center justify-content-end">
             <Navbar.Brand href="/">Navbar</Navbar.Brand>
             { isMobile ? <MobileMenu /> : null}
         </Navbar>

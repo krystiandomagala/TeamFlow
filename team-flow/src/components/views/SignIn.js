@@ -1,15 +1,14 @@
 import React, { useRef, useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
-import { useAuth } from "../contexts/AuthContext";
-import { ReactComponent as Eye } from "../assets/eye.svg";
-import { ReactComponent as EyeSlash } from "../assets/eye-slash.svg";
+import { useAuth } from "../../contexts/AuthContext";
+import { ReactComponent as Eye } from "../../assets/eye.svg";
+import { ReactComponent as EyeSlash } from "../../assets/eye.svg";
 import { Link, useNavigate } from 'react-router-dom'
 import {
   handleMouseDown,
   handleMouseUp,
-  validatePassword,
-} from "../passwordUtils";
-import BackgroundContainer from "./BackgroundContainer";
+} from "../../utils/passwordUtils";
+import BackgroundContainer from "../../layouts/AuthLayout";
 
 export default function SignIn() {
   const emailRef = useRef();

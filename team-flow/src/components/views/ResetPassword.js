@@ -1,10 +1,8 @@
 import React, { useRef, useState } from "react";
 import { Container, Col, Row, Form, Button, Alert } from "react-bootstrap";
-import { useAuth } from "../contexts/AuthContext";
-import { ReactComponent as Image } from "../assets/undraw_working.svg";
-import { ReactComponent as Icon } from "../assets/app_icon.svg";
 import { Link } from "react-router-dom";
-import BackgroundContainer from "./BackgroundContainer";
+import { useAuth } from "../../contexts/AuthContext";
+import AuthLayout from "../../layouts/AuthLayout";
 
 export default function ResetPassword() {
   const emailRef = useRef();
@@ -30,7 +28,7 @@ export default function ResetPassword() {
   }
 
   return (
-<BackgroundContainer>
+<AuthLayout>
           <div className="w-100" style={{ maxWidth: "600px" }}>
             <div>
               <h1 className="text-center mb-2">Reset your password</h1>
@@ -68,7 +66,7 @@ export default function ResetPassword() {
               </Link>
             </div>
           </div>
-</BackgroundContainer>
+</AuthLayout>
 
   );
 }

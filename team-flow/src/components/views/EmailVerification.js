@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button, Alert } from "react-bootstrap";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
+import BackgroundContainer from "../../layouts/AuthLayout";
 import { Link } from "react-router-dom";
-
-import BackgroundContainer from "./BackgroundContainer";
 
 export default function EmailVerification() {
   const { sendVerificationEmail, currentUser } = useAuth();

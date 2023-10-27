@@ -6,17 +6,17 @@ import {
   Tooltip,
   OverlayTrigger
 } from "react-bootstrap";
-import { useAuth } from "../contexts/AuthContext";
-import { ReactComponent as Info } from "../assets/info-circle.svg";
-import { ReactComponent as Eye } from "../assets/eye.svg";
-import { ReactComponent as EyeSlash } from "../assets/eye-slash.svg";
+import { useAuth } from "../../contexts/AuthContext";
+import { ReactComponent as Info } from "../../assets/info-circle.svg";
+import { ReactComponent as Eye } from "../../assets/eye.svg";
+import { ReactComponent as EyeSlash } from "../../assets/eye-slash.svg";
 import { Link, useNavigate } from "react-router-dom";
-import BackgroundContainer from "./BackgroundContainer";
+import AuthLayout from "../../layouts/AuthLayout";
 import {
   handleMouseDown,
   handleMouseUp,
   validatePassword,
-} from "../passwordUtils";
+} from "../../utils/passwordUtils";
 
 export default function SignUp() {
   const fullNameRef = useRef();
@@ -83,7 +83,7 @@ export default function SignUp() {
   }
 
   return (
-    <BackgroundContainer>
+    <AuthLayout>
       <div className="w-100" style={{ maxWidth: "600px" }}>
         <div>
           <h1 className="text-center mb-2">Sign Up</h1>
@@ -193,6 +193,6 @@ export default function SignUp() {
           Already have an account? <Link to="/sign-in">Sign In</Link>
         </div>
       </div>
-    </BackgroundContainer>
+    </AuthLayout>
   );
 }

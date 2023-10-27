@@ -4,7 +4,7 @@ import { Container, Col, Row, Navbar } from "react-bootstrap";
 import { ReactComponent as Image } from "../assets/undraw_working.svg";
 import { ReactComponent as Icon } from "../assets/app_icon.svg";
 
-export default function BackgroundContainer({ children }) {
+export default function AuthLayout({ children }) {
   return (
     <Container fluid className="app-container" style={{ height: "100vh" }}>
       <Row className="align-items-center h-100">
