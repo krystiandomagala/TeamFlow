@@ -6,7 +6,7 @@ import { ReactComponent as Icon } from "../assets/app_icon.svg";
 
 export default function AuthLayout({ children }) {
   return (
-    <Container fluid className="app-container" style={{ height: "100vh" }}>
+    <Container fluid className="app-container" style={{ height: "100vh", overflowY: "hidden" }}>
       <Row className="align-items-center h-100">
         <Col
           xs={12}

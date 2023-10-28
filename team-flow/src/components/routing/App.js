@@ -2,6 +2,7 @@ import React from 'react';
 import SignUp from '../views/SignUp';
 import SignIn from '../views/SignIn';
 import ResetPassword from '../views/ResetPassword';
+import ResetPasswordForm from '../views/ResetPasswordForm';
 import PrivateRoute from '../routing/PrivateRoute';
 import RedirectIfLoggedIn from '../routing/RedirectIfLoggedIn';
 import { AuthProvider } from '../../contexts/AuthContext';
@@ -13,6 +14,7 @@ import Statistics from '../views/Statistics';
 import Team from '../views/Team';
 import Tasks from '../views/Tasks';
 import Chat from '../views/Chat';
+import VerifyConfirm from '../views/VerifyConfirm';
 
 function App() {
   return (
@@ -33,6 +35,7 @@ function App() {
           <Route path='/team' element={<Team />} />
           <Route path='/tasks' element={<Tasks />} />
           <Route path='/chat' element={<Chat />} />
+          <Route path='/verify-confirm' element={<VerifyConfirm />} />
           <Route
             path='/sign-in'
             element={
@@ -54,6 +57,14 @@ function App() {
             element={
               <RedirectIfLoggedIn>
                 <ResetPassword />
+              </RedirectIfLoggedIn>
+            }
+          />
+          <Route
+            path='/reset-password-form'
+            element={
+              <RedirectIfLoggedIn>
+                <ResetPasswordForm />
               </RedirectIfLoggedIn>
             }
           />

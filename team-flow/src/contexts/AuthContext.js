@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import firebase from "firebase/compat/app";
+import { v4 as uuidv4 } from 'uuid';
 
 const AuthContext = React.createContext();
 
@@ -13,10 +14,12 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   function signup(email, password, fullName, isManager) {
+    const verificationToken = uuidv4();
+
     return auth.createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
         // Sending the verification email
-        userCredential.user.sendEmailVerification({url: "http://localhost:3000/verify"});
+        userCredential.user.sendEmailVerification({url: `http://localhost:3000/verify-confirm?token=${verificationToken}`});
 
         // Adding the user to Firestore
         return db.collection("users").doc(userCredential.user.uid).set({
@@ -24,7 +27,9 @@ export function AuthProvider({ children }) {
           email: email,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           isManager: isManager,
-          fullName: fullName
+          fullName: fullName,
+          verificationToken: verificationToken,
+          tokenExpiry: firebase.firestore.Timestamp.fromDate(new Date(new Date().getTime() + 60*60*1000)) // 1 hour from now
         });
       });
 }
