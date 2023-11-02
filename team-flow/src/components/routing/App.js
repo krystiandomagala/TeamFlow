@@ -14,7 +14,6 @@ import Statistics from '../views/Statistics';
 import Team from '../views/Team';
 import Tasks from '../views/Tasks';
 import Chat from '../views/Chat';
-import VerifyConfirm from '../views/VerifyConfirm';
 
 function App() {
   return (
@@ -35,7 +34,6 @@ function App() {
           <Route path='/team' element={<Team />} />
           <Route path='/tasks' element={<Tasks />} />
           <Route path='/chat' element={<Chat />} />
-          <Route path='/verify-confirm' element={<VerifyConfirm />} />
           <Route
             path='/sign-in'
             element={

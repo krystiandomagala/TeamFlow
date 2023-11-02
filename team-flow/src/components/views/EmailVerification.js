@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Alert } from "react-bootstrap";
 import { useAuth } from "../../contexts/AuthContext";
+import { auth } from "../../firebase";
 import BackgroundContainer from "../../layouts/AuthLayout";
 import { Link } from "react-router-dom";
 
@@ -11,11 +12,28 @@ export default function EmailVerification() {
   const [error, setError] = useState("");
   const [emailVerified, setEmailVerified] = useState(currentUser.emailVerified);
 
-  useEffect(() => {
-    if (currentUser) {
-      setEmailVerified(currentUser.emailVerified);
+
+useEffect(() => {
+  const checkEmailVerification = () => {
+    const user = auth.currentUser;
+    if (user) {
+      // Ponowne pobranie stanu użytkownika z Firebase
+      user.reload().then(() => {
+        setEmailVerified(user.emailVerified);
+      });
     }
-  }, [currentUser]);
+  };
+
+  // Uruchomienie funkcji od razu po montowaniu komponentu
+  checkEmailVerification();
+
+  // Uruchamianie funkcji co kilka sekund, aby sprawdzić, czy e-mail został zweryfikowany
+  const interval = setInterval(checkEmailVerification, 1000); // co 5 sekund
+
+  // Czyszczenie interwału przy demontowaniu komponentu
+  return () => clearInterval(interval);
+}, []);
+
 
   async function handleSendAgain() {
     try {
@@ -61,11 +79,9 @@ export default function EmailVerification() {
                 Send again
               </Button>
             </div>
-            <div className="w-100 text-center my-3">
-              <Link to="/sign-in">Sign In</Link>
-            </div>
-            {message && <Alert variant="success">{message}</Alert>}
-            {error && <Alert variant="danger">{error}</Alert>}
+
+            {message && <Alert variant="success" className="my-3">{message}</Alert>}
+            {error && <Alert variant="danger" className="my-3">{error}</Alert>}
           </div>
         )}
       </div>

@@ -13,6 +13,9 @@ export default function PrivateRoute({ children }) {
   if (!isEmailVerified() && location.pathname !== '/verify') {
     // sprawdzanie lokalizacji aby uniknąć nieskończonej pętli
     return <Navigate to='/verify' />;
+  } 
+  if (isEmailVerified() && location.pathname === '/verify') {
+    return <Navigate to='/' />; // Możesz przekierować użytkownika do głównej strony lub dashboardu
   }
 
   return children;
