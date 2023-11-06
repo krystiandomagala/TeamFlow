@@ -23,7 +23,8 @@ export function AuthProvider({ children }) {
           uid: userCredential.user.uid,
           email: email,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          fullName: fullName
+          fullName: fullName,
+          lastTeamId: false
         });
       });
 }

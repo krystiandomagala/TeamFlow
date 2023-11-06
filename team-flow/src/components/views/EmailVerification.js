@@ -28,7 +28,7 @@ useEffect(() => {
   checkEmailVerification();
 
   // Uruchamianie funkcji co kilka sekund, aby sprawdzić, czy e-mail został zweryfikowany
-  const interval = setInterval(checkEmailVerification, 1000); // co 5 sekund
+  const interval = setInterval(checkEmailVerification, 1000); // co 1 sekunde
 
   // Czyszczenie interwału przy demontowaniu komponentu
   return () => clearInterval(interval);
