@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLocation } from 'react-router-dom';
+import { useUserTeamData } from '../../contexts/TeamContext'; // Załóżmy, że taki hook istnieje
 
 export default function PrivateRoute({ children }) {
   const { currentUser, isEmailVerified } = useAuth();
