@@ -38,5 +38,5 @@ export default function useTeamExists() {
     }, [teamId, navigate]); // Efekt będzie ponownie uruchomiony, gdy zmieni się teamId lub navigate
   
     // Zwracanie obiektu ze stanem teamExists i isLoading
-    return { teamExists, isLoading };
+    return { teamExists, isLoading, teamId };
 };

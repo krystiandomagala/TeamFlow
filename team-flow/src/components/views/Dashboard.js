@@ -6,13 +6,25 @@ import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../../firebase';
 import useTeamExists from '../../hooks/useTeamExists';
 import Loading from '../common/Loading';
+import { useUserTeamData } from '../../contexts/TeamContext';
 
 export default function Dashboard() {
   const [error, setError] = useState('');
   const { currentUser, logout } = useAuth();
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
-  const { isLoading } = useTeamExists(); 
+  const { isLoading, teamId } = useTeamExists();
+  const { getTeamData } = useUserTeamData();
+  const [teamName, setTeamName] = useState('');
+
+
+  const fetchTeamName = async (id) => {
+    const teamData = await getTeamData(id);
+    if(!teamData)
+      return;
+      
+    setTeamName(teamData.name);
+  };
 
   useEffect(() => {
     if (currentUser?.uid) {
@@ -26,7 +38,12 @@ export default function Dashboard() {
       });
       return unsubscribe; // Cleanup on unmount
     }
+
   }, [currentUser]);
+
+  useEffect(() => {
+    fetchTeamName(teamId)
+  }, [teamId])
 
   const handleLogout = async () => {
     setError('');
@@ -39,7 +56,11 @@ export default function Dashboard() {
   };
 
   if (isLoading) {
-    return <MainLayout><Loading/></MainLayout>;
+    return (
+      <MainLayout>
+        <Loading />
+      </MainLayout>
+    );
   }
 
   return (
@@ -58,7 +79,7 @@ export default function Dashboard() {
                   <strong>Full Name:</strong> {userData.fullName}
                 </div>
                 <div>
-                  <strong>Role:</strong> {userData.isManager ? 'Team Manager' : 'Team Member'}
+                  <strong>Team:</strong> {teamName}
                 </div>
               </>
             )}

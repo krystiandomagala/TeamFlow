@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext'; // Import hooka kontekstu uwierzytelnie
 import { useNavigate } from 'react-router-dom'; // Import hooka do nawigacji
 import { db } from '../firebase'; // Import bazy danych Firebase
 // Import funkcji Firestore do manipulowania danymi
-import { collection, addDoc, updateDoc, arrayUnion, serverTimestamp, query, where, getDocs, doc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, arrayUnion, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid'; // Import funkcji do generowania unikalnych ID
 
 const UserTeamDataContext = React.createContext(); // Utworzenie kontekstu
@@ -60,7 +60,7 @@ export const UserTeamDataProvider = ({ children }) => {
       });
 
       setLastTeamId(teamDoc.id); // Ustawienie ostatniego ID zespołu po dołączeniu
-      navigate(`/${teamDoc.id}/`); // Przeniesienie użytkownika do strony zespołu
+      navigate(`/${teamDoc.id}/dashboard`); // Przeniesienie użytkownika do strony zespołu
     } catch (error) {
       console.error('Error joining team: ', error); // Obsługa błędów
     }
@@ -79,8 +79,26 @@ export const UserTeamDataProvider = ({ children }) => {
     }
   };
 
+  // Asynchroniczna funkcja do pobierania danych zespołu, o id przekazanym jako argument
+  const getTeamData = async (teamId) => {
+    try {
+      const teamDocRef = doc(db, 'teams', teamId); // Utworzenie referencji do dokumentu zespołu
+      const teamDocSnapshot = await getDoc(teamDocRef); // Pobranie snapshotu dokumentu
+  
+      if (teamDocSnapshot.exists()) {
+        return { id: teamDocSnapshot.id, ...teamDocSnapshot.data() }; // Jeśli dokument istnieje, zwróć jego dane
+      } else {
+        console.error('No such team!');
+        return null; // Jeśli nie istnieje, zwróć null
+      }
+    } catch (error) {
+      console.error('Error getting team data: ', error);
+      return null; // W przypadku błędu, zwróć null
+    }
+  };
+
   // Przekazanie wartości do kontekstu
-  const value = { createTeam, joinTeam, lastTeamId, getUserTeams, setLastTeamId: setAndPersistLastTeamId };
+  const value = { createTeam, joinTeam, lastTeamId, getUserTeams, getTeamData, setLastTeamId: setAndPersistLastTeamId };
 
   // Zawijanie dzieci w Provider kontekstu
   return <UserTeamDataContext.Provider value={value}>{children}</UserTeamDataContext.Provider>;

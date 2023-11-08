@@ -24,7 +24,8 @@ export function AuthProvider({ children }) {
           email: email,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           fullName: fullName,
-          lastTeamId: false
+          lastTeamId: null,
+          profilePhoto: null,
         });
       });
 }

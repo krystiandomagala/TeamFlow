@@ -3,7 +3,7 @@ import { Button, Modal, Form } from 'react-bootstrap';
 import { useUserTeamData } from '../../contexts/TeamContext'; // Hook do zarządzania danymi zespołu użytkownika
 import TopBar from '../common/TopBar'; // Komponent paska górnego
 import { Link } from 'react-router-dom'; // Link z react-router-dom do nawigacji
-
+import TeamItem from '../common/TeamItem';
 // Główny komponent do wyboru zespołu
 export default function SelectTeam() {
   // Hooki stanu do zarządzania stanem komponentu
@@ -57,73 +57,69 @@ export default function SelectTeam() {
   // Renderowanie UI komponentu
   return (
     <>
-      <TopBar />
-      <div className='p-5'>
-        <h1>Select team</h1>
-        {/* Przyciski do otwierania modali */}
-        <Button onClick={() => setShowCreateTeamModal(true)}>
-          Create team
-        </Button>
-        <Button className='m-3' onClick={() => setShowJoinTeamModal(true)}>
-          Join team
-        </Button>
+      <div className='px-3'>
+        <TopBar />
 
-        <h1>Your teams</h1>
-        {/* Lista zespołów użytkownika */}
-        {teams.map((team) => (
-          <div key={team.id}>
-            {/* Link do dashboardu zespołu */}
-            <Link to={`/${team.id}/dashboard`} className='team-link' onClick={() => handleSelectTeam(team.id)}>
-              {team.name}
-            </Link>
+        <div className='mt-2'>
+          {/* Przyciski do otwierania modali */}
+          <Button onClick={() => setShowCreateTeamModal(true)}>Create team</Button>
+          <Button className='m-2' onClick={() => setShowJoinTeamModal(true)}>
+            Join team
+          </Button>
+
+          <h1 className='mt-5'>Your teams</h1>
+          {/* Lista zespołów użytkownika */}
+
+          <div className='d-flex'>
+          {teams.map((team) => (
+            <div key={team.id}>
+              {/* Link do dashboardu zespołu */ 
+            console.log(team)
+              }
+              <Link to={`/${team.id}/dashboard`} style={{textDecoration: "none"}}  onClick={() => handleSelectTeam(team.id)}>
+                <TeamItem team={team}/>
+              </Link>
+            </div>
+          ))}
+
           </div>
-        ))}
 
-        {/* Modal do tworzenia nowego zespołu */}
-        <TeamModal
-          show={showCreateTeamModal}
-          onHide={() => setShowCreateTeamModal(false)}
-          title="Create a New Team"
-          onSubmit={handleCreateTeam}
-          controlId="team-name"
-          label="Team name"
-          placeholder="Enter your team's name"
-          value={teamName}
-          onChange={setTeamName}
-          buttonText="Create team"
-        />
 
-        {/* Modal do dołączania do zespołu */}
-        <TeamModal
-          show={showJoinTeamModal}
-          onHide={() => setShowJoinTeamModal(false)}
-          title="Join a Team"
-          onSubmit={handleJoinTeam}
-          controlId="team-code"
-          label="Team access code"
-          placeholder="Enter team access code"
-          value={accessCode}
-          onChange={setAccessCode}
-          buttonText="Join team"
-        />
+          {/* Modal do tworzenia nowego zespołu */}
+          <TeamModal
+            show={showCreateTeamModal}
+            onHide={() => setShowCreateTeamModal(false)}
+            title='Create a New Team'
+            onSubmit={handleCreateTeam}
+            controlId='team-name'
+            label='Team name'
+            placeholder="Enter your team's name"
+            value={teamName}
+            onChange={setTeamName}
+            buttonText='Create team'
+          />
+
+          {/* Modal do dołączania do zespołu */}
+          <TeamModal
+            show={showJoinTeamModal}
+            onHide={() => setShowJoinTeamModal(false)}
+            title='Join a Team'
+            onSubmit={handleJoinTeam}
+            controlId='team-code'
+            label='Team access code'
+            placeholder='Enter team access code'
+            value={accessCode}
+            onChange={setAccessCode}
+            buttonText='Join team'
+          />
+        </div>
       </div>
     </>
   );
 }
 
 // Komponent modalny wykorzystywany do tworzenia i dołączania do zespołów
-function TeamModal({
-  show,
-  onHide,
-  title,
-  onSubmit,
-  controlId,
-  label,
-  placeholder,
-  value,
-  onChange,
-  buttonText
-}) {
+function TeamModal({ show, onHide, title, onSubmit, controlId, label, placeholder, value, onChange, buttonText }) {
   // Renderowanie modalu z formularzem
   return (
     <Modal show={show} onHide={onHide} centered>
@@ -135,13 +131,7 @@ function TeamModal({
           <Form.Group id={controlId} className='mb-3'>
             <Form.Label>{label}</Form.Label>
             {/* Pola formularza z kontrolowanymi komponentami */}
-            <Form.Control
-              type='text'
-              placeholder={placeholder}
-              required
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-            />
+            <Form.Control type='text' placeholder={placeholder} required value={value} onChange={(e) => onChange(e.target.value)} />
           </Form.Group>
           {/* Przycisk wysyłający formularz */}
           <Button type='submit' className='w-100'>

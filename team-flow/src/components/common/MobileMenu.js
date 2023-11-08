@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Sidebar as ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Button } from "react-bootstrap";
+import { ReactComponent as Icon } from "../../assets/app_icon.svg";
 import { ReactComponent as TeamFlowIcon } from "../../assets/team_flow_icon.svg";
 import { ReactComponent as DashboardIcon } from "../../assets/dashboard.svg";
 import { ReactComponent as ScheduleIcon } from "../../assets/schedule.svg";
@@ -12,71 +13,65 @@ import { ReactComponent as MenuIcon } from "../../assets/bars.svg";
 import { Link } from "react-router-dom";
 import { useUserTeamData } from "../../contexts/TeamContext";
 
-// Styl dla elementów menu
-const menuItemStyle = {
-  fontSize: "32px",
-  color: "#2F2E41",
-  marginTop: "30px",
-  marginBottom: "100px",
-};
 
-// Funkcja określająca styl ikon w zależności od tego, czy są aktywne
-const iconStyle = (active) => ({
-  color: active ? "#007bff" : undefined,
-});
-
-// Komponent MobileMenu odpowiada za wyświetlanie bocznego menu w wersji mobilnej
 export default function MobileMenu() {
-  const [isVisible, setIsVisible] = useState(false); // Stan określający, czy menu jest widoczne
-  const { lastTeamId } = useUserTeamData(); // Hook kontekstowy przechowujący dane zespołu użytkownika
-  
-  // Funkcja generująca propsy dla poszczególnych pozycji w menu
-  const getMenuItemProps = (path) => ({
-    active: window.location.pathname === `/${lastTeamId}/${path}`,
-    icon: {
-      Dashboard: <DashboardIcon />,
-      Schedule: <ScheduleIcon />,
-      Statistics: <StatisticsIcon />,
-      Team: <TeamIcon />,
-      Tasks: <TasksIcon />,
-      Chat: <ChatIcon />,
-    }[path],
-    component: <Link to={`/${lastTeamId}/${path.toLowerCase()}`} />,
-  });
+
+  const [isVisible, setIsVisible] = useState(false);
+  const sidebarStyle = isVisible ? { left: 0 } : { left: "-280px" };
+  const { lastTeamId } = useUserTeamData(); // Używamy hooka useUserTeamData
 
   return (
     <>
-      <ProSidebar
-        style={{
-          left: isVisible ? 0 : "-280px", // Pozycja bocznego menu
-          position: "fixed",
-          top: 0,
-          zIndex: 1000,
-          height: "100vh", // Wysokość ustawiona na 100% wysokości viewportu
-          backgroundColor: "#FBFBFB",
-          transition: "left 0.3s ease-in-out", // Animacja przejścia
-          width: "280px", // Szerokość menu
-        }}
-      >
-        <Menu
-          menuItemStyles={{
-            icon: iconStyle,
-            button: iconStyle,
+        <ProSidebar
+          style={{
+            ...sidebarStyle,
+            position: "fixed",
+            top: 0,
+            zIndex: 1000,
+            height: "100vh",
+            backgroundColor: "#FBFBFB",
+            transition: "left 0.3s ease-in-out",
           }}
+          width="280px"
         >
-          {/* Pozycja menu z logo */}
-          <MenuItem icon={<TeamFlowIcon />} style={menuItemStyle}>
-            Team<span style={{ fontWeight: "900" }}>Flow</span>
-          </MenuItem>
-          {/* Generowanie pozostałych pozycji menu */}
-          {['Dashboard', 'Schedule', 'Statistics', 'Team', 'Tasks', 'Chat'].map((item) => (
-            <MenuItem key={item} {...getMenuItemProps(item)}>{item}</MenuItem>
-          ))}
-        </Menu>
-      </ProSidebar>
-
-      {/* Przycisk do pokazywania/ukrywania bocznego menu */}
-      <Button className="btn btn-light" onClick={() => setIsVisible(!isVisible)}>
+          <Menu
+            menuItemStyles={{
+              icon: ({ active, disabled }) => {
+                return {
+                  color: active ? "#007bff" : undefined,
+                };
+              },
+              button: ({ active, disabled }) => {
+                return {
+                  color: active ? "#007bff" : undefined,
+                };
+              },
+            }}
+          >
+            <MenuItem
+              icon={<TeamFlowIcon />}
+              style={{
+                fontSize: "32px",
+                color: "#2F2E41",
+                marginTop: "30px",
+                marginBottom: "100px",
+              }}
+            >
+              Team<span style={{ fontWeight: "900" }}>Flow</span>
+            </MenuItem>
+            <MenuItem  active={window.location.pathname === `/${lastTeamId}/dashboard`}  icon={<DashboardIcon />}  component={<Link to={`/${lastTeamId}/dashboard`} />}>Dashboard</MenuItem>
+        <MenuItem active={window.location.pathname === `/${lastTeamId}/schedule`} icon={<ScheduleIcon />} component={<Link to={`/${lastTeamId}/schedule`} />}>Schedule</MenuItem>
+        <MenuItem active={window.location.pathname === `/${lastTeamId}/statistics`} icon={<StatisticsIcon />} component={<Link to={`/${lastTeamId}/statistics`} />}>Statistics</MenuItem>
+        <MenuItem active={window.location.pathname === `/${lastTeamId}/team`} icon={<TeamIcon />} component={<Link to={`/${lastTeamId}/team`} />}>Team</MenuItem>
+        <MenuItem active={window.location.pathname ===  `/${lastTeamId}/tasks`} icon={<TasksIcon />} component={<Link to={`/${lastTeamId}/tasks`} />}>Tasks</MenuItem>
+        <MenuItem active={window.location.pathname ===  `/${lastTeamId}/chat`} icon={<ChatIcon />} component={<Link to={`/${lastTeamId}/chat`} />}>Chat</MenuItem>
+          </Menu>
+        </ProSidebar>
+      
+      <Button
+        className="btn btn-light"
+        onClick={() => setIsVisible(!isVisible)}
+      >
         <MenuIcon />
       </Button>
     </>
