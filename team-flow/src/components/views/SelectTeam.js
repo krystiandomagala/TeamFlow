@@ -61,31 +61,21 @@ export default function SelectTeam() {
         <TopBar />
 
         <div className='mt-2'>
-          {/* Przyciski do otwierania modali */}
+          <h1>Team select</h1>
           <Button onClick={() => setShowCreateTeamModal(true)}>Create team</Button>
-          <Button className='m-2' onClick={() => setShowJoinTeamModal(true)}>
-            Join team
-          </Button>
+          <Button className='m-2' onClick={() => setShowJoinTeamModal(true)}>Join team</Button>
 
-          <h1 className='mt-5'>Your teams</h1>
-          {/* Lista zespołów użytkownika */}
-
-          <div className='d-flex'>
-          {teams.map((team) => (
-            <div key={team.id}>
-              {/* Link do dashboardu zespołu */ 
-            console.log(team)
-              }
-              <Link to={`/${team.id}/dashboard`} style={{textDecoration: "none"}}  onClick={() => handleSelectTeam(team.id)}>
-                <TeamItem team={team}/>
-              </Link>
-            </div>
-          ))}
-
+          <h2>Your teams</h2>
+          <div className='d-flex gap-3 py-3 teams-wrapper scrollbar'>
+            {teams.map((team) => (
+              <div key={team.id}>
+                <Link to={`/${team.id}/dashboard`} style={{ textDecoration: 'none' }} onClick={() => handleSelectTeam(team.id)}>
+                  <TeamItem team={team} />
+                </Link>
+              </div>
+            ))}
           </div>
 
-
-          {/* Modal do tworzenia nowego zespołu */}
           <TeamModal
             show={showCreateTeamModal}
             onHide={() => setShowCreateTeamModal(false)}
@@ -98,8 +88,6 @@ export default function SelectTeam() {
             onChange={setTeamName}
             buttonText='Create team'
           />
-
-          {/* Modal do dołączania do zespołu */}
           <TeamModal
             show={showJoinTeamModal}
             onHide={() => setShowJoinTeamModal(false)}

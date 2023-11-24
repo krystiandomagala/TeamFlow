@@ -4,9 +4,10 @@ body{
     font-family: 'Inter', sans-serif;
 }
 
-h1{
+h1, h2{
     font-weight: 900;
 }
+
 .input-with-icon-container {
     position: relative;
   }
@@ -25,4 +26,102 @@ h1{
 
 .label-text{
     font-weight: 600;
+}
+
+.avatar{
+    border-radius: 50%;
+    background-color: #5D5D5B;
+    height: 40px;
+    width: 40px;
+    line-height: 40px;
+    text-align: center;
+    object-fit: cover;
+    transition: filter 0.15s ease-in-out;
+}
+
+.avatar-mini{
+    border-radius: 50%;
+    background-color: #5D5D5B;
+    height: 30px;
+    width: 30px;
+    line-height: 30px;
+    text-align: center;
+    object-fit: cover;
+    outline: white 4px solid;
+}
+
+.avatar:hover{
+    filter: opacity(80%);
+}
+
+.teams-wrapper{
+    overflow-x: auto;
+}
+
+/* Stylizowanie całego paska przewijania */
+::-webkit-scrollbar {
+    height: 8px; /* szerokość paska przewijania */
+}
+
+/* Stylizowanie tła paska przewijania (ścieżki, po której porusza się kciuk) */
+::-webkit-scrollbar-track {
+    background: #f5f5f5; /* kolor tła */
+    border-radius: 4px;
+
+}
+
+/* Stylizowanie elementu przewijania (kciuka) */
+::-webkit-scrollbar-thumb {
+    background: rgb(224, 224, 224); /* kolor kciuka */
+    border-radius: 4px;
+}
+
+/* Zmiana koloru kciuka paska przewijania podczas najechania lub przyciśnięcia */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #ababab; /* kolor kciuka przy najechaniu */
+}
+
+.ellipsis {
+    overflow: hidden; /* Ukryj tekst, który się nie mieści */
+    white-space: nowrap; /* Zapobiegaj przenoszeniu tekstu do nowej linii */
+    text-overflow: ellipsis; /* Dodaj trzy kropki, gdy tekst jest za długi */
+  }
+
+  .team-creation-date{
+    line-height: 100%;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: right;
+    background-color: #1271FB;
+    border-bottom-color: transparent;
+  }
+
+  .team-creation-date-header{
+    font-size: 0.7rem;
+  }
+
+  .team-item-container{
+    width: 16rem;
+    transition: filter  0.2s ease-in-out;
+  }
+
+  .team-item-container:hover{
+    filter:brightness(90%)
+}
+
+.num-of-hidden-users{
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #ADB5BD;
+}
+
+.mini-title{
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: #ADB5BD;
+}
+
+.team-item-header{
+    font-weight: 900;
 }

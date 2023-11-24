@@ -16,11 +16,13 @@ import SelectTeam from '../views/SelectTeam';
 import Tasks from '../views/Tasks';
 import Chat from '../views/Chat';
 import NotFound from '../views/NotFound';
+import { UserProvider } from '../../contexts/UserContext';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <UserProvider>
         <UserTeamDataProvider>
           <Routes>
             <Route exact path='/:teamId/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
@@ -66,6 +68,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </UserTeamDataProvider>
+        </UserProvider>
       </AuthProvider>
     </Router>
   );
