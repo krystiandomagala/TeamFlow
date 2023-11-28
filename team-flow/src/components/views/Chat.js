@@ -2,6 +2,8 @@ import React from 'react';
 import MainLayout from '../../layouts/MainLayout'
 import Loading from '../common/Loading'
 import useTeamExists from '../../hooks/useTeamExists';
+import ChatsList from '../common/ChatsList';
+import ChatWindow from '../common/ChatWindow';
 
 export default function Chat() {
   const { isLoading } = useTeamExists();
@@ -12,7 +14,8 @@ export default function Chat() {
 
   return (
     <MainLayout>
-      <div>Chat</div>
+      <ChatsList />
+      <ChatWindow />
     </MainLayout>
   );
 }

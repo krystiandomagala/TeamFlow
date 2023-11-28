@@ -3,8 +3,7 @@ import Image from 'react-bootstrap/Image'
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { useUser } from "../../contexts/UserContext";
 
-// Komponent AvatarMini
-export default function AvatarMini({ userId }) {
+export default function AvatarMid({ userId }) {
   const [user, setUser] = useState()
   const { getUserData } = useUser()
 
@@ -30,9 +29,9 @@ export default function AvatarMini({ userId }) {
   return (
     <>
        {user?.profilePhoto ? (
-        <Image src={user?.profilePhoto} className="avatar-mini" alt="Profile" roundedCircle />
+        <Image src={user?.profilePhoto} className="avatar-mid" alt="Profile" roundedCircle />
       ) : (
-        <div className="avatar-mini">{initials}</div>
+        <div className="avatar-mid">{initials}</div>
       )}
     </>
   );

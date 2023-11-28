@@ -16,7 +16,6 @@ export default function Sidebar() {
 
   const navigate = useNavigate();
 
-  console.log(lastTeamId);
   useEffect(() => {
     const handleResize = () => {
       setCollapsed(window.innerWidth <= 1200);
@@ -30,7 +29,6 @@ export default function Sidebar() {
   }, []);
 
   useEffect(() => {
-    console.log('lastTeamId updated:', lastTeamId);
     // Jeśli lastTeamId jest null, możemy przekierować do strony wyboru zespołu lub wyświetlić odpowiednią informację
     if (lastTeamId === null) {
       navigate('/'); // Przekieruj do strony wyboru zespołu

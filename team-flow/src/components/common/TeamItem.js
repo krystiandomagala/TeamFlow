@@ -26,6 +26,8 @@ export default function TeamItem({ team }) {
        {formatDateFromSeconds(team.createdAt.seconds)}</Card.Header>
       <Card.Body>
         <Card.Title className='ellipsis team-item-header'>{team.name}</Card.Title>
+        <hr className='divider' />
+        <p className='subtitle'>Opis teamu</p>
         <span className='mini-title'>Members</span>
         <div className='mt-1'>
           {team.memberIds.slice(0, 3).map((user) => (

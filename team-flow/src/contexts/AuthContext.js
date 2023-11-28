@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import firebase from "firebase/compat/app";
+import { setDoc } from "firebase/firestore";
 
 const AuthContext = React.createContext();
 
@@ -18,6 +19,8 @@ export function AuthProvider({ children }) {
         // Sending the verification email
         userCredential.user.sendEmailVerification();
 
+        setDoc(db, "userChats", userCredential.user.uid)
+
         // Adding the user to Firestore
         return db.collection("users").doc(userCredential.user.uid).set({
           uid: userCredential.user.uid,
@@ -27,6 +30,7 @@ export function AuthProvider({ children }) {
           lastTeamId: null,
           profilePhoto: null,
         });
+
       });
 }
 
