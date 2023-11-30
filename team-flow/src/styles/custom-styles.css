@@ -169,7 +169,7 @@ h1, h2{
 .chat-item{
     cursor: pointer;
 }
-.chat-item:hover{
+.chat-item-not-active:hover{
     background-color: #f5f5f5;
 }
 
@@ -248,4 +248,8 @@ h1, h2{
 
 .img-fluid{
     width: 100%;
+}
+
+.chat-active{
+    background-color: #D9EBFF;
 }

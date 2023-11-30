@@ -4,7 +4,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { useChat } from '../../contexts/ChatContext';
 import { Button } from 'react-bootstrap';
 import { ReactComponent as SendIcon } from '../../assets/paper-plane.svg';
-import { arrayUnion, doc, serverTimestamp, Timestamp, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, serverTimestamp, Timestamp, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { v4 as uuid } from 'uuid';
 import { db, storage } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -53,6 +53,8 @@ export default function ChatInput() {
   const handleSend = async () => {
     let lastMessageText = text.trim().length > 0 ? text : "Image uploaded";
   
+    const messagesRef = collection(db, 'chats', data.chatId, 'messages');
+
     if (images.length > 0) {
       for (const imageObj of images) {
         const storageRef = ref(storage, `images/${uuid()}`);
@@ -68,14 +70,12 @@ export default function ChatInput() {
           },
           async () => {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            await updateDoc(doc(db, 'chats', data.chatId), {
-              messages: arrayUnion({
-                id: uuid(),
-                text: text.trim().length > 0 ? text : null,
-                senderId: currentUser.uid,
-                date: Timestamp.now(),
-                image: downloadURL,
-              }),
+            await addDoc(messagesRef, {
+              text: null,
+              senderId: currentUser.uid,
+              date: serverTimestamp(),
+              image: downloadURL,
+              // Możesz dodać inne pola, jeśli są potrzebne
             });
           }
         );
@@ -83,13 +83,11 @@ export default function ChatInput() {
     } 
   
     if (text.trim().length > 0) {
-      await updateDoc(doc(db, 'chats', data.chatId), {
-        messages: arrayUnion({
-          id: uuid(),
-          text: text.trim(),
-          senderId: currentUser.uid,
-          date: Timestamp.now(),
-        }),
+      await addDoc(messagesRef, {
+        text: text.trim(),
+        senderId: currentUser.uid,
+        date: serverTimestamp(),
+        // Możesz dodać inne pola, jeśli są potrzebne
       });
     }
   

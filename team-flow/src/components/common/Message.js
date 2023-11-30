@@ -22,7 +22,7 @@ export default function Message({ message  }) {
         <Avatar userId={message.senderId} />
         {message.image ? (
           <>
-            <img className='message-img' src={message.image} onClick={handleImageClick} style={{ cursor: 'pointer' }} onLoad={console.log("loaded")}/>
+            <img className='message-img' src={message.image} onClick={handleImageClick} style={{ cursor: 'pointer' }}/>
             <Modal show={showModal} onHide={handleCloseModal} size="xl" centered>
               <Modal.Body>
                 <img src={message.image} className='img-fluid' alt='Chat Image' />

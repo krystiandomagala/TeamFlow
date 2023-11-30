@@ -21,7 +21,7 @@ export default function ChatsList() {
   const [currUser, setCurrUser] = useState(null);
   const [chats, setChats] = useState([]);
   const { dispatch } = useChat();
-  const [lastMessage, setLastMessage] = useState(null);
+  const [activeChat, setActiveChat] = useState();
 
   useEffect(() => {
     const getChats = () => {
@@ -87,7 +87,7 @@ export default function ChatsList() {
           console.log('chatSnap.exists():', chatSnap.exists());
 
           if (!chatSnap.exists()) {
-            await setDoc(doc(db, 'chats', combinedId), { messages: [] });
+            await setDoc(doc(db, 'chats', combinedId), {});
           }
 
             await updateDoc(doc(db, 'userChats', currUser.uid), {
@@ -119,6 +119,7 @@ export default function ChatsList() {
 
   const handleSelectChat = (u) => {
     dispatch({ type: 'CHANGE_USER', payload: u });
+    setActiveChat(u.uid)
     console.log(u);
   };
 
@@ -143,13 +144,13 @@ export default function ChatsList() {
       <Form.Group>
         <Form.Control className='form-control-lg' type='text' placeholder='Szukaj chatu'></Form.Control>
       </Form.Group>
-      <div className='mt-3'>
+      <div className='mt-3 d-flex flex-column gap-1'>
         {Object.entries(chats)
           ?.sort((a, b) => b[1].date - a[1].date)
           .map((chat) => {
             return (
               <div onClick={() => handleSelectChat(chat[1].userInfo)} key={chat[0]}>
-                <ChatItem chat={chat[1]} />
+                <ChatItem chat={chat[1]} active={activeChat} />
               </div>
             );
           })}
