@@ -241,6 +241,11 @@ h1, h2{
 }
 
 .message-img{
-    max-width: 50%;
+    height: 200px;
     border-radius: 12px;
+    background-color:#5D5D5B;
+}
+
+.img-fluid{
+    width: 100%;
 }
