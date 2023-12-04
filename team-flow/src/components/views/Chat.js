@@ -9,7 +9,7 @@ export default function Chat() {
   const { isLoading } = useTeamExists();
 
   if (isLoading) {
-    return <MainLayout><Loading/></MainLayout>;
+    return <MainLayout><Loading /></MainLayout>;
   }
 
   return (

@@ -59,6 +59,7 @@ export const UserTeamDataProvider = ({ children }) => {
         memberIds: arrayUnion(currentUser.uid),
       });
 
+
       setLastTeamId(teamDoc.id); // Ustawienie ostatniego ID zespołu po dołączeniu
       navigate(`/${teamDoc.id}/dashboard`); // Przeniesienie użytkownika do strony zespołu
     } catch (error) {
@@ -84,7 +85,7 @@ export const UserTeamDataProvider = ({ children }) => {
     try {
       const teamDocRef = doc(db, 'teams', teamId); // Utworzenie referencji do dokumentu zespołu
       const teamDocSnapshot = await getDoc(teamDocRef); // Pobranie snapshotu dokumentu
-  
+
       if (teamDocSnapshot.exists()) {
         return { id: teamDocSnapshot.id, ...teamDocSnapshot.data() }; // Jeśli dokument istnieje, zwróć jego dane
       } else {

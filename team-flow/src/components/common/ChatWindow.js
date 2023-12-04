@@ -6,6 +6,7 @@ import { useChat } from '../../contexts/ChatContext';
 import { collection, doc, query, orderBy, limit, onSnapshot, startAfter } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Spinner } from 'react-bootstrap';
+import useTeamExists from '../../hooks/useTeamExists';
 
 export default function ChatWindow() {
   const [messages, setMessages] = useState([]);
@@ -14,34 +15,36 @@ export default function ChatWindow() {
   const [lastVisible, setLastVisible] = useState(null);
   const [loading, setLoading] = useState(false);
   const observer = useRef(null);
+  const { teamId } = useTeamExists()
   const ref = useRef();
   const [isNearBottom, setIsNearBottom] = useState(true); // Dodany stan
 
-const loadMoreMessages = async () => {
-  if (loading || !lastVisible) return;
+  const loadMoreMessages = async () => {
 
-  setLoading(true);
+    if (loading || !lastVisible || !lastVisible.data().date) return; // Sprawdź, czy data jest zatwierdzona
 
-  // Zapamiętaj wysokość kontenera przed załadowaniem nowych wiadomości
-  const previousScrollHeight = messagesContainerRef.current.scrollHeight;
+    setLoading(true);
 
-  const nextMessagesQuery = query(collection(db, 'chats', data.chatId, 'messages'), orderBy('date', 'desc'), startAfter(lastVisible), limit(30));
+    // Zapamiętaj wysokość kontenera przed załadowaniem nowych wiadomości
+    const previousScrollHeight = messagesContainerRef.current.scrollHeight;
 
-  onSnapshot(nextMessagesQuery, (snapshot) => {
-    const newMessages = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })).reverse();
-    setMessages((prevMessages) => [...newMessages, ...prevMessages]);
-    setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+    const nextMessagesQuery = query(collection(db, 'chats', data.chatId, 'messages'), orderBy('date', 'desc'), startAfter(lastVisible), limit(30));
 
-    setLoading(false);
+    onSnapshot(nextMessagesQuery, (snapshot) => {
+      const newMessages = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })).reverse();
+      setMessages((prevMessages) => [...newMessages, ...prevMessages]);
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
 
-    // Oblicz różnicę wysokości i dostosuj scrollTop
-    const newScrollHeight = messagesContainerRef.current.scrollHeight;
-    messagesContainerRef.current.scrollTop += (newScrollHeight - previousScrollHeight);
-  });
-};
+      setLoading(false);
+
+      // Oblicz różnicę wysokości i dostosuj scrollTop
+      const newScrollHeight = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop += (newScrollHeight - previousScrollHeight);
+    });
+  };
 
   useEffect(() => {
-    if (!data.chatId) return;
+    if (!data.chatId || !teamId) return;
 
     const q = query(collection(db, 'chats', data.chatId, 'messages'), orderBy('date', 'desc'), limit(30));
     const unsub = onSnapshot(q, (snapshot) => {
@@ -56,7 +59,6 @@ const loadMoreMessages = async () => {
   useEffect(() => {
     observer.current = new IntersectionObserver(entries => {
       const firstEntry = entries[0];
-      console.log(firstEntry)
       if (firstEntry.isIntersecting) {
         loadMoreMessages();
       }
@@ -72,23 +74,25 @@ const loadMoreMessages = async () => {
         observer.current.unobserve(targetElement);
       }
     };
-  }, [loadMoreMessages]);
+  }, [loadMoreMessages, teamId]);
 
-    const handleScroll = () => {
+  const handleScroll = () => {
     const messagesContainer = messagesContainerRef.current;
     const distanceFromBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
-    setIsNearBottom(distanceFromBottom < 200); // 1000 to przykładowa wartość, można dostosować
+    setIsNearBottom(distanceFromBottom < 200);
   };
 
+  console.log(teamId)
+  console.log(data.teamId)
+
   useEffect(() => {
-     if (isNearBottom) 
-    ref.current?.scrollIntoView();
+    if (isNearBottom)
+      ref.current?.scrollIntoView();
   }, [messages]);
 
-
   return (
-    <div className='p-5 w-100 d-flex flex-column'>
-      {data.chatId && data.chatId !== 'null' && (
+    <div className='p-5 w-100 d-flex flex-column chat-window'>
+      {data.teamId === teamId && (
         <>
           <div className='d-flex align-items-center'>
             <AvatarMid userId={data.user?.uid} />
@@ -101,7 +105,7 @@ const loadMoreMessages = async () => {
           <div className='flex-grow-1 pe-3 my-3 messages-container d-flex flex-column' ref={messagesContainerRef} onScroll={handleScroll}>
             {loading && <Spinner animation='border' role='status' variant='primary' className='align-self-center' />}
             {messages.map((m) => <Message message={m} key={m.id} />)}
-            <div ref={ref}/>
+            <div ref={ref} />
           </div>
           <ChatInput />
         </>

@@ -1,4 +1,4 @@
-import { getDocs, setDoc, doc, updateDoc, getDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { getDocs, setDoc, doc, updateDoc, getDoc, serverTimestamp, onSnapshot, where, collection, query } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { Form, Modal, Button } from 'react-bootstrap';
 import { ReactComponent as PlusIcon } from '../../assets/square-plus.svg';
@@ -22,10 +22,12 @@ export default function ChatsList() {
   const [chats, setChats] = useState([]);
   const { dispatch } = useChat();
   const [activeChat, setActiveChat] = useState();
+  const [searchTerm, setSearchTerm] = useState('');
+
 
   useEffect(() => {
     const getChats = () => {
-      const unsub = onSnapshot(doc(db, 'userChats', currentUser.uid), (doc) => {
+      const unsub = onSnapshot(doc(db, 'userChats', currentUser.uid, 'teamChats', teamId), (doc) => {
         setChats(doc.data());
       });
 
@@ -44,7 +46,8 @@ export default function ChatsList() {
     };
 
     currentUser.uid && getChats();
-  }, [currentUser.uid]);
+  }, [currentUser.uid, teamId]);
+
 
   useEffect(() => {
     const loadTeamMembers = async () => {
@@ -77,8 +80,9 @@ export default function ChatsList() {
         if (docSnap.exists()) {
           const userData = docSnap.data();
           console.log('userData:', userData);
+          console.log('id:', teamId);
 
-          const combinedId = currentUser.uid > userData.uid ? currentUser.uid + userData.uid : userData.uid + currentUser.uid;
+          const combinedId = `${teamId}${currentUser.uid > userData.uid ? currentUser.uid + userData.uid : userData.uid + currentUser.uid}`;
           console.log('combinedId:', combinedId);
 
           // Sprawdzanie, czy chat już istnieje
@@ -90,27 +94,33 @@ export default function ChatsList() {
             await setDoc(doc(db, 'chats', combinedId), {});
           }
 
-            await updateDoc(doc(db, 'userChats', currUser.uid), {
-              [`${combinedId}.userInfo`]: {
+          await updateDoc(doc(db, 'userChats', currUser.uid, 'teamChats', teamId), {
+            [combinedId]: { // Usunięcie szablonu stringowego `` i użycie zmiennej bezpośrednio
+              userInfo: {
                 uid: userData.uid,
                 fullName: userData.fullName,
                 profilePhoto: userData.profilePhoto,
               },
-              [`${combinedId}.date`]: serverTimestamp(),
-            });
+              date: serverTimestamp(),
+              lastMessage: { text: null }
+            }
+          });
 
-            await updateDoc(doc(db, 'userChats', userId), {
-              [`${combinedId}.userInfo`]: {
+          await updateDoc(doc(db, 'userChats', userId, 'teamChats', teamId), {
+            [combinedId]: { // Usunięcie szablonu stringowego `` i użycie zmiennej bezpośrednio
+              userInfo: {
                 uid: currUser.uid,
                 fullName: currUser.fullName,
                 profilePhoto: currUser.profilePhoto,
               },
-              [`${combinedId}.date`]: serverTimestamp(),
-            });
-            // Wykonaj updateDoc
-          } else {
-            console.error('Brakujące dane użytkownika');
-          }
+              date: serverTimestamp(),
+              lastMessage: { text: null }
+            }
+          });
+          // Wykonaj updateDoc
+        } else {
+          console.error('Brakujące dane użytkownika');
+        }
       })
       .catch((error) => {
         console.error('Błąd podczas pobierania danych użytkownika:', error);
@@ -118,8 +128,9 @@ export default function ChatsList() {
   };
 
   const handleSelectChat = (u) => {
-    dispatch({ type: 'CHANGE_USER', payload: u });
+    dispatch({ type: 'CHANGE_USER', payload: u, teamId: teamId });
     setActiveChat(u.uid)
+    setSearchTerm('');
     console.log(u);
   };
 
@@ -142,11 +153,16 @@ export default function ChatsList() {
         </Modal>
       </div>
       <Form.Group>
-        <Form.Control className='form-control-lg' type='text' placeholder='Szukaj chatu'></Form.Control>
+        <Form.Control className='form-control-lg' type='text' placeholder='Search chat' value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}></Form.Control>
       </Form.Group>
       <div className='mt-3 d-flex flex-column gap-1'>
-        {Object.entries(chats)
-          ?.sort((a, b) => b[1].date - a[1].date)
+        {chats && Object.entries(chats)
+          .filter(([id, chat]) => {
+            // Check if userInfo and fullName exist before filtering
+            return chat.userInfo && chat.userInfo.fullName
+              && chat.userInfo.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+          })
+          .sort((a, b) => b[1].date - a[1].date)
           .map((chat) => {
             return (
               <div onClick={() => handleSelectChat(chat[1].userInfo)} key={chat[0]}>

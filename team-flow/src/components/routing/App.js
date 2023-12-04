@@ -23,55 +23,54 @@ function App() {
     <Router>
       <AuthProvider>
         <UserProvider>
-        <UserTeamDataProvider>
-        <ChatProvider>
+          <UserTeamDataProvider>
+            <ChatProvider>
+              <Routes>
+                <Route exact path='/:teamId/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                <Route path='/:teamId/schedule' element={<PrivateRoute><Schedule /></PrivateRoute>} />
+                <Route path='/:teamId/statistics' element={<PrivateRoute><Statistics /></PrivateRoute>} />
+                <Route path='/:teamId/team' element={<PrivateRoute><Team /></PrivateRoute>} />
+                <Route path='/:teamId/tasks' element={<PrivateRoute><Tasks /></PrivateRoute>} />
+                <Route path='/:teamId/chat' element={<PrivateRoute><Chat /></PrivateRoute>} />
 
-          <Routes>
-            <Route exact path='/:teamId/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-              <Route path='/:teamId/schedule' element={<PrivateRoute><Schedule /></PrivateRoute>} />
-              <Route path='/:teamId/statistics' element={<PrivateRoute><Statistics /></PrivateRoute>} />
-              <Route path='/:teamId/team' element={<PrivateRoute><Team /></PrivateRoute>} />
-              <Route path='/:teamId/tasks' element={<PrivateRoute><Tasks /></PrivateRoute>} />
-              <Route path='/:teamId/chat' element={<PrivateRoute><Chat /></PrivateRoute>} />
+                <Route path='/' element={<PrivateRoute><SelectTeam /></PrivateRoute>} />
+                <Route
+                  path='/sign-in'
+                  element={
+                    <RedirectIfLoggedIn>
+                      <SignIn />
+                    </RedirectIfLoggedIn>
+                  }
+                />
+                <Route
+                  path='/sign-up'
+                  element={
+                    <RedirectIfLoggedIn>
+                      <SignUp />
+                    </RedirectIfLoggedIn>
+                  }
+                />
+                <Route
+                  path='/reset-password'
+                  element={
+                    <RedirectIfLoggedIn>
+                      <ResetPassword />
+                    </RedirectIfLoggedIn>
+                  }
+                />
+                <Route
+                  path='/verify'
+                  element={
+                    <PrivateRoute>
+                      <EmailVerification />
+                    </PrivateRoute>
+                  }
+                ></Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
 
-            <Route path='/' element={<PrivateRoute><SelectTeam /></PrivateRoute>} />
-            <Route
-              path='/sign-in'
-              element={
-                <RedirectIfLoggedIn>
-                  <SignIn />
-                </RedirectIfLoggedIn>
-              }
-            />
-            <Route
-              path='/sign-up'
-              element={
-                <RedirectIfLoggedIn>
-                  <SignUp />
-                </RedirectIfLoggedIn>
-              }
-            />
-            <Route
-              path='/reset-password'
-              element={
-                <RedirectIfLoggedIn>
-                  <ResetPassword />
-                </RedirectIfLoggedIn>
-              }
-            />
-            <Route
-              path='/verify'
-              element={
-                <PrivateRoute>
-                  <EmailVerification />
-                </PrivateRoute>
-              }
-            ></Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-                    
-        </ChatProvider>
-        </UserTeamDataProvider>
+            </ChatProvider>
+          </UserTeamDataProvider>
         </UserProvider>
       </AuthProvider>
     </Router>

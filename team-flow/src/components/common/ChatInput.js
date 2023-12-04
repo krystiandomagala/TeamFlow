@@ -9,12 +9,14 @@ import { v4 as uuid } from 'uuid';
 import { db, storage } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import useTeamExists from '../../hooks/useTeamExists';
 
 export default function ChatInput() {
   const [images, setImages] = useState([]);
   const [text, setText] = useState('');
   const { data } = useChat();
   const { currentUser } = useAuth();
+  const { teamId } = useTeamExists()
 
   const handleChange = (e) => setText(e.target.value);
 
@@ -52,14 +54,14 @@ export default function ChatInput() {
 
   const handleSend = async () => {
     let lastMessageText = text.trim().length > 0 ? text : "Image uploaded";
-  
+
     const messagesRef = collection(db, 'chats', data.chatId, 'messages');
 
     if (images.length > 0) {
       for (const imageObj of images) {
         const storageRef = ref(storage, `images/${uuid()}`);
         const uploadTask = uploadBytesResumable(storageRef, imageObj.blob);
-  
+
         uploadTask.on(
           'state_changed',
           (snapshot) => {
@@ -80,8 +82,8 @@ export default function ChatInput() {
           }
         );
       }
-    } 
-  
+    }
+
     if (text.trim().length > 0) {
       await addDoc(messagesRef, {
         text: text.trim(),
@@ -90,27 +92,25 @@ export default function ChatInput() {
         // Możesz dodać inne pola, jeśli są potrzebne
       });
     }
-  
+
+
+    console.log(data.chatId + ".lastMessage")
     // Aktualizacja ostatniej wiadomości
-    await updateDoc(doc(db, "userChats", currentUser.uid), {
-      [data.chatId + ".lastMessage"]: {
-        text: lastMessageText,
-      },
-      [data.chatId + ".date"]: serverTimestamp(),
+    await updateDoc(doc(db, 'userChats', currentUser.uid, 'teamChats', teamId), {
+      [`${data.chatId}.lastMessage.text`]: lastMessageText,
+      [`${data.chatId}.date`]: serverTimestamp(),
     });
-  
-    await updateDoc(doc(db, "userChats", data.user.uid), {
-      [data.chatId + ".lastMessage"]: {
-        text: lastMessageText,
-      },
-      [data.chatId + ".date"]: serverTimestamp(),
+
+    await updateDoc(doc(db, "userChats", data.user.uid, 'teamChats', teamId), {
+      [`${data.chatId}.lastMessage.text`]: lastMessageText,
+      [`${data.chatId}.date`]: serverTimestamp(),
     });
-  
+
     // Resetowanie stanu
     setText("");
     setImages([]);
   };
-  
+
 
   const canSend = text.trim().length > 0 || images.length > 0;
 
@@ -127,7 +127,7 @@ export default function ChatInput() {
         </div>
         <TextareaAutosize maxRows={6} type='text' value={text} onChange={handleChange} onPaste={handlePaste} placeholder='Aa' className='text-input' />
       </div>
-      <Button onClick={handleSend} disabled={!canSend} style={{height: "50px"}}>
+      <Button onClick={handleSend} disabled={!canSend} style={{ height: "50px" }}>
         <SendIcon />
       </Button>
     </div>
