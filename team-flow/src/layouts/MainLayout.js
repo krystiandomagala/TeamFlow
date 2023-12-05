@@ -1,20 +1,11 @@
 import { React, useEffect, useState } from 'react';
 import Sidebar from '../components/common/Sidebar';
 import TopBar from '../components/common/TopBar';
+import useWindowSize from '../hooks/useWindowSize';
 
 function Layout({ children }) {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); // Nowy state
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+  const isMobile = useWindowSize();
 
-    window.addEventListener('resize', handleResize);
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
   return (
     <div style={{ height: '100vh' }} className='d-flex'>
       <div>{isMobile ? null : <Sidebar />}</div>

@@ -10,8 +10,9 @@ import ChatItem from '../common/ChatItem';
 import NewChatListItem from './NewChatListItem';
 import { db } from '../../firebase';
 import { useChat } from '../../contexts/ChatContext';
+import useWindowSize from '../../hooks/useWindowSize';
 
-export default function ChatsList() {
+export default function ChatsList({ onChatSelect }) {
   const [showModal, setShowModal] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
   const { getTeamData } = useUserTeamData();
@@ -23,7 +24,7 @@ export default function ChatsList() {
   const { dispatch } = useChat();
   const [activeChat, setActiveChat] = useState();
   const [searchTerm, setSearchTerm] = useState('');
-
+  const isMobile = useWindowSize()
 
   useEffect(() => {
     const getChats = () => {
@@ -128,14 +129,16 @@ export default function ChatsList() {
   };
 
   const handleSelectChat = (u) => {
-    dispatch({ type: 'CHANGE_USER', payload: u, teamId: teamId });
-    setActiveChat(u.uid)
     setSearchTerm('');
-    console.log(u);
+    setActiveChat(u.uid)
+    if (onChatSelect) {
+      onChatSelect();
+      dispatch({ type: 'CHANGE_USER', payload: u, teamId: teamId });
+    }
   };
 
   return (
-    <div className='border-end chat-list pt-3 pe-3'>
+    <div className='border-end chat-list pt-3 pe-md-3'>
       <div className='d-flex align-items-baseline justify-content-between'>
         <h1>Chats</h1>
         <PlusIcon className='icon-btn' onClick={handleShow} />
@@ -165,7 +168,7 @@ export default function ChatsList() {
           .sort((a, b) => b[1].date - a[1].date)
           .map((chat) => {
             return (
-              <div onClick={() => handleSelectChat(chat[1].userInfo)} key={chat[0]}>
+              <div onClick={() => handleSelectChat(chat[1].userInfo, [chat[0]])} key={chat[0]}>
                 <ChatItem chat={chat[1]} active={activeChat} />
               </div>
             );

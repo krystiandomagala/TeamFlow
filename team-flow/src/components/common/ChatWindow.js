@@ -5,15 +5,18 @@ import Message from './Message';
 import { useChat } from '../../contexts/ChatContext';
 import { collection, doc, query, orderBy, limit, onSnapshot, startAfter } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Spinner } from 'react-bootstrap';
+import { Button, Spinner } from 'react-bootstrap';
 import useTeamExists from '../../hooks/useTeamExists';
+import useWindowSize from '../../hooks/useWindowSize';
+import { ReactComponent as ArrowIcon } from "../../assets/arrow-left.svg"
 
-export default function ChatWindow() {
+export default function ChatWindow({ onBack }) {
   const [messages, setMessages] = useState([]);
   const { data } = useChat();
   const messagesContainerRef = useRef(null);
   const [lastVisible, setLastVisible] = useState(null);
   const [loading, setLoading] = useState(false);
+  const isMobile = useWindowSize()
   const observer = useRef(null);
   const { teamId } = useTeamExists()
   const ref = useRef();
@@ -81,20 +84,19 @@ export default function ChatWindow() {
     const distanceFromBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
     setIsNearBottom(distanceFromBottom < 200);
   };
-
-  console.log(teamId)
-  console.log(data.teamId)
-
   useEffect(() => {
     if (isNearBottom)
       ref.current?.scrollIntoView();
   }, [messages]);
 
   return (
-    <div className='p-5 w-100 d-flex flex-column chat-window'>
+    <div className='p-lg-5 ps-md-3 py-3 w-100 d-flex flex-column chat-window'>
       {data.teamId === teamId && (
         <>
           <div className='d-flex align-items-center'>
+            {onBack && isMobile && (
+              <Button onClick={onBack} className="me-3 chat-back-btn"><ArrowIcon /></Button>
+            )}
             <AvatarMid userId={data.user?.uid} />
             <div className='lh-sm ms-3'>
               <div className='chat-item-title' style={{ fontSize: '22px' }}>
