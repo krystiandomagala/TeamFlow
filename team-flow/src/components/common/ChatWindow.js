@@ -87,6 +87,8 @@ export default function ChatWindow({ onBack }) {
     const distanceFromBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
     setIsNearBottom(distanceFromBottom < 1000);
   };
+
+
   useEffect(() => {
     if (isNearBottom)
       ref.current?.scrollIntoView();
@@ -102,7 +104,7 @@ export default function ChatWindow({ onBack }) {
       .catch((error) => {
         console.error('Błąd podczas pobierania danych użytkownika:', error);
       });
-  }, [])
+  }, [data.chatId])
 
 
   return (
