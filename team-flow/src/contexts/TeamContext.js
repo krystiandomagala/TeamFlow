@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext'; // Import hooka kontekstu uwierzytelnie
 import { useNavigate } from 'react-router-dom'; // Import hooka do nawigacji
 import { db } from '../firebase'; // Import bazy danych Firebase
 // Import funkcji Firestore do manipulowania danymi
-import { collection, addDoc, updateDoc, arrayUnion, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, arrayUnion, serverTimestamp, query, where, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid'; // Import funkcji do generowania unikalnych ID
 
 const UserTeamDataContext = React.createContext(); // Utworzenie kontekstu
@@ -35,6 +35,9 @@ export const UserTeamDataProvider = ({ children }) => {
         accessCode: uuidv4(), // Wygenerowany unikalny kod dostępu
       });
       setLastTeamId(docRef.id); // Ustawienie ostatniego ID zespołu po stworzeniu nowego zespołu
+
+      setDoc(doc(db, "userChats", currentUser.uid, "teamChats", docRef.id), {})
+
     } catch (error) {
       console.error('Error adding document: ', error); // Obsługa błędów
     }
@@ -59,7 +62,7 @@ export const UserTeamDataProvider = ({ children }) => {
         memberIds: arrayUnion(currentUser.uid),
       });
 
-
+      setDoc(doc(db, "userChats", currentUser.uid, "teamChats", teamDoc.id), {})
       setLastTeamId(teamDoc.id); // Ustawienie ostatniego ID zespołu po dołączeniu
       navigate(`/${teamDoc.id}/dashboard`); // Przeniesienie użytkownika do strony zespołu
     } catch (error) {

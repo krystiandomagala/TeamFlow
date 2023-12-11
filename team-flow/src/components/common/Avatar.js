@@ -17,7 +17,7 @@ const Avatar = ({ userId }) => {
   }, [userId, getUserData]);
 
   function createInitials(fullName) {
-    if(!user) return;
+    if (!user) return;
 
     const names = fullName.split(' ');
     if (names.length > 1) {
@@ -29,7 +29,7 @@ const Avatar = ({ userId }) => {
 
   return (
     <>
-       {user?.profilePhoto ? (
+      {user?.profilePhoto ? (
         <Image src={user?.profilePhoto} className="avatar" alt="Profile" roundedCircle />
       ) : (
         <div className="avatar">{initials}</div>

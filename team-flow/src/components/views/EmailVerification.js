@@ -3,36 +3,45 @@ import { Button, Alert } from "react-bootstrap";
 import { useAuth } from "../../contexts/AuthContext";
 import { auth } from "../../firebase";
 import BackgroundContainer from "../../layouts/AuthLayout";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function EmailVerification() {
-  const { sendVerificationEmail, currentUser } = useAuth();
+  const { sendVerificationEmail, currentUser, logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [emailVerified, setEmailVerified] = useState(currentUser.emailVerified);
-
-
-useEffect(() => {
-  const checkEmailVerification = () => {
-    const user = auth.currentUser;
-    if (user) {
-      // Ponowne pobranie stanu użytkownika z Firebase
-      user.reload().then(() => {
-        setEmailVerified(user.emailVerified);
-      });
+  const navigate = useNavigate()
+  const handleLogout = async () => {
+    setError('');
+    try {
+      await logout();
+      navigate('/');
+    } catch {
+      setError('Failed to log out.');
     }
   };
 
-  // Uruchomienie funkcji od razu po montowaniu komponentu
-  checkEmailVerification();
+  useEffect(() => {
+    const checkEmailVerification = () => {
+      const user = auth.currentUser;
+      if (user) {
+        // Ponowne pobranie stanu użytkownika z Firebase
+        user.reload().then(() => {
+          setEmailVerified(user.emailVerified);
+        });
+      }
+    };
 
-  // Uruchamianie funkcji co kilka sekund, aby sprawdzić, czy e-mail został zweryfikowany
-  const interval = setInterval(checkEmailVerification, 1000); // co 1 sekunde
+    // Uruchomienie funkcji od razu po montowaniu komponentu
+    checkEmailVerification();
 
-  // Czyszczenie interwału przy demontowaniu komponentu
-  return () => clearInterval(interval);
-}, []);
+    // Uruchamianie funkcji co kilka sekund, aby sprawdzić, czy e-mail został zweryfikowany
+    const interval = setInterval(checkEmailVerification, 1000); // co 1 sekunde
+
+    // Czyszczenie interwału przy demontowaniu komponentu
+    return () => clearInterval(interval);
+  }, []);
 
 
   async function handleSendAgain() {
@@ -79,7 +88,11 @@ useEffect(() => {
                 Send again
               </Button>
             </div>
-
+            <div className='text-center mt-3'>
+              <Button variant='link' onClick={handleLogout}>
+                Log Out
+              </Button>
+            </div>
             {message && <Alert variant="success" className="my-3">{message}</Alert>}
             {error && <Alert variant="danger" className="my-3">{error}</Alert>}
           </div>

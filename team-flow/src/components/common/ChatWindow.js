@@ -9,6 +9,7 @@ import { Button, Spinner } from 'react-bootstrap';
 import useTeamExists from '../../hooks/useTeamExists';
 import useWindowSize from '../../hooks/useWindowSize';
 import { ReactComponent as ArrowIcon } from "../../assets/arrow-left.svg"
+import { useUser } from '../../contexts/UserContext';
 
 export default function ChatWindow({ onBack }) {
   const [messages, setMessages] = useState([]);
@@ -21,6 +22,8 @@ export default function ChatWindow({ onBack }) {
   const { teamId } = useTeamExists()
   const ref = useRef();
   const [isNearBottom, setIsNearBottom] = useState(true); // Dodany stan
+  const { getUserData } = useUser();
+  const [fullName, setFullName] = useState('')
 
   const loadMoreMessages = async () => {
 
@@ -82,25 +85,38 @@ export default function ChatWindow({ onBack }) {
   const handleScroll = () => {
     const messagesContainer = messagesContainerRef.current;
     const distanceFromBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
-    setIsNearBottom(distanceFromBottom < 200);
+    setIsNearBottom(distanceFromBottom < 1000);
   };
   useEffect(() => {
     if (isNearBottom)
       ref.current?.scrollIntoView();
   }, [messages]);
 
+
+  useEffect(() => {
+    getUserData(data.user.uid)
+      .then((data) => {
+        // Przetwórz dane użytkownika i ustaw je w stanie komponentu
+        setFullName(data.fullName);
+      })
+      .catch((error) => {
+        console.error('Błąd podczas pobierania danych użytkownika:', error);
+      });
+  }, [])
+
+
   return (
-    <div className='p-lg-5 ps-md-3 py-3 w-100 d-flex flex-column chat-window'>
+    <div className='p-lg-5 ps-md-3 py-3 w-100 d-flex flex-column  container'>
       {data.teamId === teamId && (
         <>
           <div className='d-flex align-items-center'>
             {onBack && isMobile && (
-              <Button onClick={onBack} className="me-3 chat-back-btn"><ArrowIcon /></Button>
+              <div onClick={onBack} className="me-3 chat-back-btn"><ArrowIcon /></div>
             )}
             <AvatarMid userId={data.user?.uid} />
             <div className='lh-sm ms-3'>
               <div className='chat-item-title' style={{ fontSize: '22px' }}>
-                {data.user?.fullName}
+                {fullName}
               </div>
             </div>
           </div>

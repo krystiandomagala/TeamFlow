@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import firebase from "firebase/compat/app";
-import { setDoc } from "firebase/firestore";
+import { setDoc, doc } from "firebase/firestore";
 
 const AuthContext = React.createContext();
 
@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
         // Sending the verification email
         userCredential.user.sendEmailVerification();
 
-        setDoc(db, "userChats", userCredential.user.uid)
+        setDoc(doc(db, "userChats", userCredential.user.uid), {})
 
         // Adding the user to Firestore
         return db.collection("users").doc(userCredential.user.uid).set({
@@ -32,16 +32,16 @@ export function AuthProvider({ children }) {
         });
 
       });
-}
+  }
 
   function login(email, password) {
     return auth.signInWithEmailAndPassword(email, password);
   }
-  function logout(){
+  function logout() {
     return auth.signOut()
   }
 
-  function resetPassword(email){
+  function resetPassword(email) {
     return auth.sendPasswordResetEmail(email)
   }
 
@@ -57,23 +57,23 @@ export function AuthProvider({ children }) {
     }
   }
 
-  useEffect(()=>{
-      const unsubscribe = auth.onAuthStateChanged((user) => {
-          setCurrentUser(user)
-        setLoading(false)
-      });
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user)
+      setLoading(false)
+    });
 
-      return unsubscribe
+    return unsubscribe
   }, [])
 
   const value = {
     currentUser,
     login,
-    signup, 
+    signup,
     logout,
     resetPassword,
     isEmailVerified,
-    sendVerificationEmail  
+    sendVerificationEmail
   };
 
   return (<AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>)

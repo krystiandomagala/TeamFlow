@@ -17,6 +17,8 @@ export default function ChatInput() {
   const { data } = useChat();
   const { currentUser } = useAuth();
   const { teamId } = useTeamExists()
+  const [totalUploadProgress, setTotalUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleChange = (e) => setText(e.target.value);
 
@@ -54,10 +56,16 @@ export default function ChatInput() {
 
   const handleSend = async () => {
     let lastMessageText = text.trim().length > 0 ? text : "Image uploaded";
+    const uploadsCompleted = {};
 
     const messagesRef = collection(db, 'chats', data.chatId, 'messages');
 
     if (images.length > 0) {
+      setIsUploading(true);
+      let totalBytesTransferred = 0;
+      let totalBytes = images.reduce((acc, img) => acc + img.blob.size, 0);
+
+
       for (const imageObj of images) {
         const storageRef = ref(storage, `images/${uuid()}`);
         const uploadTask = uploadBytesResumable(storageRef, imageObj.blob);
@@ -65,7 +73,9 @@ export default function ChatInput() {
         uploadTask.on(
           'state_changed',
           (snapshot) => {
-            // Obsługa postępu przesyłania
+            totalBytesTransferred += snapshot.bytesTransferred;
+            const progress = (totalBytesTransferred / totalBytes) * 100;
+            setTotalUploadProgress(progress);
           },
           (error) => {
             console.error('Błąd przesyłania: ', error);
@@ -79,6 +89,13 @@ export default function ChatInput() {
               image: downloadURL,
               // Możesz dodać inne pola, jeśli są potrzebne
             });
+
+            uploadsCompleted[imageObj.blob.name] = true;
+            const allUploadsCompleted = images.every(img => uploadsCompleted[img.blob.name]);
+            if (allUploadsCompleted) {
+              setTotalUploadProgress(0);
+              setIsUploading(false);
+            }
           }
         );
       }
@@ -117,17 +134,26 @@ export default function ChatInput() {
   return (
     <div className='d-flex align-items-end gap-2'>
       <div className='chat-input-container form-control'>
+
+        {isUploading && (
+          <div className='progress'>
+            <div className="progress-bar bg-primary" style={{ width: `${totalUploadProgress}%` }}></div>
+          </div>
+        )}
+
         <div className='images-container d-flex'>
+
           {images?.map((imageObj, index) => (
             <div key={index} className='image-container my-2'>
               <img src={imageObj.dataUrl} alt={`Załącznik ${index}`} />
               <CloseIcon onClick={() => removeImage(index)} className='close-btn' />
             </div>
           ))}
+
         </div>
         <TextareaAutosize maxRows={6} type='text' value={text} onChange={handleChange} onPaste={handlePaste} placeholder='Aa' className='text-input' />
       </div>
-      <Button onClick={handleSend} disabled={!canSend} style={{ height: "50px" }}>
+      <Button onClick={handleSend} disabled={!canSend} style={{ height: "55px" }}>
         <SendIcon />
       </Button>
     </div>

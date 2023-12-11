@@ -16,6 +16,7 @@ import SelectTeam from '../views/SelectTeam';
 import Tasks from '../views/Tasks';
 import Chat from '../views/Chat';
 import NotFound from '../views/NotFound';
+import Settings from '../views/Settings';
 import { UserProvider } from '../../contexts/UserContext';
 import { ChatProvider } from '../../contexts/ChatContext';
 function App() {
@@ -32,6 +33,7 @@ function App() {
                 <Route path='/:teamId/team' element={<PrivateRoute><Team /></PrivateRoute>} />
                 <Route path='/:teamId/tasks' element={<PrivateRoute><Tasks /></PrivateRoute>} />
                 <Route path='/:teamId/chat' element={<PrivateRoute><Chat /></PrivateRoute>} />
+                <Route path='/settings' element={<PrivateRoute><Settings /></PrivateRoute>} />
 
                 <Route path='/' element={<PrivateRoute><SelectTeam /></PrivateRoute>} />
                 <Route

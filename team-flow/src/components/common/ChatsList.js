@@ -25,6 +25,7 @@ export default function ChatsList({ onChatSelect }) {
   const [activeChat, setActiveChat] = useState();
   const [searchTerm, setSearchTerm] = useState('');
   const isMobile = useWindowSize()
+  const [fullName, setFullName] = useState('')
 
   useEffect(() => {
     const getChats = () => {
@@ -99,7 +100,6 @@ export default function ChatsList({ onChatSelect }) {
             [combinedId]: { // Usunięcie szablonu stringowego `` i użycie zmiennej bezpośrednio
               userInfo: {
                 uid: userData.uid,
-                fullName: userData.fullName,
                 profilePhoto: userData.profilePhoto,
               },
               date: serverTimestamp(),
@@ -111,7 +111,6 @@ export default function ChatsList({ onChatSelect }) {
             [combinedId]: { // Usunięcie szablonu stringowego `` i użycie zmiennej bezpośrednio
               userInfo: {
                 uid: currUser.uid,
-                fullName: currUser.fullName,
                 profilePhoto: currUser.profilePhoto,
               },
               date: serverTimestamp(),
