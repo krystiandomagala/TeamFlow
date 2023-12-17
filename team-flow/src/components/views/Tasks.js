@@ -3,7 +3,7 @@ import MainLayout from '../../layouts/MainLayout';
 import Loading from '../common/Loading'
 import useTeamExists from '../../hooks/useTeamExists';
 import TaskItem from '../common/TaskItem';
-import { addDoc, collection, Timestamp, getDocs } from 'firebase/firestore';
+import { addDoc, collection, Timestamp, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase'; // ścieżka do Twojej konfiguracji Firebase
 import { Button, Form, Modal } from 'react-bootstrap';
 import { useUserTeamData } from '../../contexts/TeamContext';
@@ -14,6 +14,7 @@ import ToggleSwitch from '../common/ToggleSwitch';
 import SubtaskItem from '../common/SubtaskItem';
 import { ReactComponent as ArrowUpIcon } from '../../assets/arrow-up.svg'
 import { ReactComponent as ArrowDownIcon } from '../../assets/arrow-down.svg'
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function Tasks() {
   const [showModal, setShowModal] = useState(false);
@@ -31,10 +32,39 @@ export default function Tasks() {
   const today = new Date().toISOString().split('T')[0];
   const [priority, setPriority] = useState('medium');
   const [modalPage, setModalPage] = useState(1);
-  const [isListExpanded, setIsListExpanded] = useState(false); // new state for managing list expansion
-  const toggleList = () => {
-    setIsListExpanded(!isListExpanded);
+  const [isTeamTasksExpanded, setIsTeamTasksExpanded] = useState(false);
+  const [isUserTasksExpanded, setIsUserTasksExpanded] = useState(false);
+
+  const { currentUser } = useAuth();
+
+  const userTasks = tasks.filter(task => task.assignedUsers.includes(currentUser.uid));
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'teams', teamId, 'tasks'),
+      (snapshot) => {
+        const tasksData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setTasks(tasksData);
+      },
+      (error) => {
+        console.error("Error fetching tasks: ", error);
+      }
+    );
+
+    return () => unsubscribe(); // Wyczyść nasłuchiwacz podczas odmontowywania komponentu
+  }, [teamId]);
+
+  const toggleTeamTasks = () => {
+    setIsTeamTasksExpanded(!isTeamTasksExpanded);
   };
+
+  const toggleUserTasks = () => {
+    setIsUserTasksExpanded(!isUserTasksExpanded);
+  };
+
   useEffect(() => {
     const fetchTasks = async () => {
       const querySnapshot = await getDocs(collection(db, 'teams', teamId, 'tasks'));
@@ -52,8 +82,8 @@ export default function Tasks() {
 
   const addSubtask = () => {
     if (subtaskInput.trim() !== '') {
-      setSubtasks([...subtasks, { name: subtaskInput, isCompleted: false }]);
-      setSubtaskInput(''); // Resetowanie pola wejściowego
+      setSubtasks([...subtasks, { name: subtaskInput, isCompleted: false, assignedUsers: [] }]);
+      setSubtaskInput('');
     }
   };
 
@@ -109,6 +139,7 @@ export default function Tasks() {
 
   const handleSelectChange = selectedOptions => {
     setSelectedUsers(selectedOptions);
+    console.log(selectedUsers)
   };
 
   const resetForm = () => {
@@ -124,6 +155,14 @@ export default function Tasks() {
   const handleSaveTask = async () => {
     // Logika zapisywania zadania
     // Po zapisaniu możesz zamknąć modal lub zresetować stan strony
+
+    const preparedSubtasks = subtasks.map(subtask => {
+      return {
+        ...subtask,
+        assignedUsers: subtask.assignedUsers ? subtask.assignedUsers.map(user => user.value) : []
+      };
+    });
+
     const assignedUserIds = selectedUsers.map(user => user.value); // Zakładając, że selectedUsers jest tablicą obiektów z kluczem 'value'
 
     const taskData = {
@@ -134,7 +173,7 @@ export default function Tasks() {
       priority: priority,
       state: 'in progress',
       assignedUsers: assignedUserIds,
-      subtasks: subtasks,
+      subtasks: preparedSubtasks,
       pinned: []
 
       // ...
@@ -148,6 +187,7 @@ export default function Tasks() {
     }
     setShowModal(false);
     setModalPage(1);
+    resetForm()
   };
 
   if (isLoading) {
@@ -163,15 +203,18 @@ export default function Tasks() {
 
   }
 
-  const updateSubtask = (index, newName) => {
-    const newSubtasks = [...subtasks];
-    newSubtasks[index].name = newName;
-    setSubtasks(newSubtasks);
+  const updateSubtask = (index, newName, newAssignedUsers) => {
+    setSubtasks(subtasks.map((subtask, subtaskIndex) => {
+      if (index === subtaskIndex) {
+        return { ...subtask, name: newName, assignedUsers: newAssignedUsers };
+      }
+      return subtask;
+    }));
   };
 
   return (
     <MainLayout>
-      <div className='m-3 d-flex flex-column w-100'>
+      <div className='my-3 pe-3 d-flex flex-column w-100' style={{ overflowY: 'auto' }}>
         <div>
           <h1>Tasks</h1>
           <Button variant="primary" onClick={handleShow}>+ Add new</Button>
@@ -223,6 +266,7 @@ export default function Tasks() {
                     isMulti
                     options={usersOptions}
                     onChange={handleSelectChange}
+                    value={selectedUsers}
                     className="mb-3"
                     placeholder="No users assigned"
                     components={{ Option: CustomOption }}
@@ -252,6 +296,7 @@ export default function Tasks() {
                         index={index}
                         updateSubtask={updateSubtask}
                         removeSubtask={removeSubtask}
+                        selectedUsers={selectedUsers}
                       />
                     ))}
                   </ol>
@@ -267,7 +312,7 @@ export default function Tasks() {
                   Close
                 </Button>
                 <Button variant="primary" onClick={goToNextPage}>
-                  Dalej
+                  Next
                 </Button>
               </>
             ) : (
@@ -288,20 +333,40 @@ export default function Tasks() {
             Team tasks
           </span>
         </div>
-        <div className='d-flex flex-column pe-3 overflow-auto'>
+        <div className='d-flex flex-column'>
 
           {tasks.map((task, index) => {
             // Render only the first item if the list is not expanded
-            if (!isListExpanded && index > 0) return null;
+            if (!isTeamTasksExpanded && index > 0) return null;
 
             return <TaskItem key={task.id} task={task} teamId={teamId} />;
           })}
-          {tasks.length > 1 && (
-            <div onClick={toggleList} className='show-less-more'>
-              {isListExpanded ? <><ArrowUpIcon /> Show less </> : <> <ArrowDownIcon />Show more</>}
-            </div>
-          )}
         </div>
+        {tasks.length > 1 && (
+          <div onClick={toggleTeamTasks} className='show-less-more'>
+            {isTeamTasksExpanded ? <><ArrowUpIcon /> Show less </> : <> <ArrowDownIcon />Show more</>}
+          </div>
+        )}
+
+        <div className="divider mb-3 mt-5">
+          <span>
+            Your tasks
+          </span>
+        </div>
+        <div className='d-flex flex-column'>
+
+          {userTasks.map((task, index) => {
+            // Render only the first item if the list is not expanded
+            if (!isUserTasksExpanded && index > 0) return null;
+
+            return <TaskItem key={task.id} task={task} teamId={teamId} />;
+          })}
+        </div>
+        {tasks.length > 1 && (
+          <div onClick={toggleUserTasks} className='show-less-more'>
+            {isUserTasksExpanded ? <><ArrowUpIcon /> Show less </> : <> <ArrowDownIcon />Show more</>}
+          </div>
+        )}
 
       </div>
     </MainLayout >

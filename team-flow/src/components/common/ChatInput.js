@@ -128,7 +128,6 @@ export default function ChatInput() {
     setImages([]);
   };
 
-
   const canSend = text.trim().length > 0 || images.length > 0;
 
   return (

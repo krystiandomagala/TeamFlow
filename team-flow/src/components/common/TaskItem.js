@@ -4,9 +4,9 @@ import { ReactComponent as DotsIcon } from '../../assets/ellipsis-vertical.svg'
 import { ReactComponent as CalendarIcon } from '../../assets/calendar-filled.svg'
 import { ReactComponent as ArrowUpIcon } from '../../assets/arrow-up.svg'
 import { ReactComponent as ArrowDownIcon } from '../../assets/arrow-down.svg'
-import { doc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { db } from '../../firebase'
-import { Dropdown, Form } from 'react-bootstrap'
+import { Button, Dropdown, Form, Modal } from 'react-bootstrap'
 import AvatarMini from './AvatarMini'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -17,6 +17,26 @@ export default function TaskItem({ task, teamId }) {
     const contentRef = useRef(null);
     const { currentUser } = useAuth()
     const isPinnedByCurrentUser = task.pinned.includes(currentUser.uid);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    const handleRemoveClick = () => {
+        setShowConfirmModal(true);
+    };
+
+    const handleCloseConfirmModal = () => {
+        setShowConfirmModal(false);
+    };
+
+    const confirmRemoveTask = async () => {
+        const taskRef = doc(db, 'teams', teamId, 'tasks', task.id);
+        try {
+            await deleteDoc(taskRef);
+            console.log('Task successfully removed');
+            setShowConfirmModal(false);
+        } catch (error) {
+            console.error('Error removing task: ', error);
+        }
+    };
 
     const togglePinTask = async () => {
         const taskRef = doc(db, 'teams', teamId, 'tasks', task.id);
@@ -120,9 +140,26 @@ export default function TaskItem({ task, teamId }) {
                         <Dropdown.Item>Edit</Dropdown.Item>
                         <Dropdown.Item onClick={togglePinTask}> {isPinnedByCurrentUser ? 'Unpin' : 'Pin'}</Dropdown.Item>
                         <Dropdown.Divider />
-                        <Dropdown.Item>Remove</Dropdown.Item>
+                        <Dropdown.Item onClick={handleRemoveClick}>Remove</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
+
+                <Modal show={showConfirmModal} onHide={handleCloseConfirmModal} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Confirm Removal</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        Are you sure you want to remove this task?
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseConfirmModal}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={confirmRemoveTask}>
+                            Remove
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
 
             </div>
             <div className='mb-2 d-flex align-items-center gap-2 deadline-text'>
