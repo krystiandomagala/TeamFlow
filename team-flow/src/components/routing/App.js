@@ -32,6 +32,8 @@ function App() {
                 <Route path='/:teamId/statistics' element={<PrivateRoute><Statistics /></PrivateRoute>} />
                 <Route path='/:teamId/team' element={<PrivateRoute><Team /></PrivateRoute>} />
                 <Route path='/:teamId/tasks' element={<PrivateRoute><Tasks /></PrivateRoute>} />
+
+                <Route />
                 <Route path='/:teamId/chat' element={<PrivateRoute><Chat /></PrivateRoute>} />
                 <Route path='/settings' element={<PrivateRoute><Settings /></PrivateRoute>} />
 

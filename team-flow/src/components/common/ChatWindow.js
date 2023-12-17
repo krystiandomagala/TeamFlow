@@ -108,7 +108,7 @@ export default function ChatWindow({ onBack }) {
 
 
   return (
-    <div className='p-lg-5 ps-md-3 py-3 w-100 d-flex flex-column  container'>
+    <div className='p-lg-5 ps-md-3 py-3 w-100 d-flex flex-column container'>
       {data.teamId === teamId && (
         <>
           <div className='d-flex align-items-center'>

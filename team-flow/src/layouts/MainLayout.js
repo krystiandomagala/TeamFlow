@@ -11,7 +11,7 @@ function Layout({ children }) {
       <div>{isMobile ? null : <Sidebar />}</div>
       <div className='px-3 d-flex flex-column' style={{ width: '100%' }}>
         <TopBar />
-        <div className='h-100 d-flex' style={{ flex: 1, overflowY: 'hidden' }}>
+        <div className='d-flex' style={{ flex: 1, height: "calc(100% - 57px)" }}>
           {children}
         </div>
       </div>

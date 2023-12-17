@@ -71,6 +71,9 @@ export default function ChatsList({ onChatSelect }) {
     }
   }, [getTeamData, getUserData, teamId, currentUser.uid]);
 
+
+  console.log(teamMembers)
+
   const handleClose = () => setShowModal(false);
   const handleShow = () => setShowModal(true);
 
@@ -99,8 +102,6 @@ export default function ChatsList({ onChatSelect }) {
             [combinedId]: { // Usunięcie szablonu stringowego `` i użycie zmiennej bezpośrednio
               userInfo: {
                 uid: userData.uid,
-                fullName: userData.fullName,
-                profilePhoto: userData.profilePhoto,
               },
               date: serverTimestamp(),
               lastMessage: { text: null }
@@ -111,8 +112,6 @@ export default function ChatsList({ onChatSelect }) {
             [combinedId]: { // Usunięcie szablonu stringowego `` i użycie zmiennej bezpośrednio
               userInfo: {
                 uid: currUser.uid,
-                fullName: currUser.fullName,
-                profilePhoto: currUser.profilePhoto,
               },
               date: serverTimestamp(),
               lastMessage: { text: null }
@@ -137,8 +136,9 @@ export default function ChatsList({ onChatSelect }) {
     }
   };
 
+
   return (
-    <div className='border-end chat-list pt-3 pe-md-3'>
+    <div className='border-end chat-list pt-3 pe-md-3 '>
       <div className='d-flex align-items-baseline justify-content-between'>
         <h1>Chats</h1>
         <PlusIcon className='icon-btn' onClick={handleShow} />
@@ -161,12 +161,14 @@ export default function ChatsList({ onChatSelect }) {
       <div className='mt-3 d-flex flex-column gap-1'>
         {chats && Object.entries(chats)
           .filter(([id, chat]) => {
-            // Check if userInfo and fullName exist before filtering
-            return chat.userInfo && chat.userInfo.fullName
-              && chat.userInfo.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+            if (!chat.userInfo) return false;
+            const user = teamMembers.find(member => member.uid === chat.userInfo.uid);
+            return user ? user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) : false;
           })
           .sort((a, b) => b[1].date - a[1].date)
           .map((chat) => {
+
+            console.log(chat[1].userInfo.uid)
             return (
               <div onClick={() => handleSelectChat(chat[1].userInfo, [chat[0]])} key={chat[0]}>
                 <ChatItem chat={chat[1]} active={activeChat} />

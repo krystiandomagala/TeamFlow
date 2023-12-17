@@ -27,9 +27,9 @@ export default function Settings() {
 
     const toggleEditMode = () => {
         if (isEditMode) {
-            // Reset the preview URL to the original if canceling edit mode
             setTempPreviewUrl('');
             setUploaded(false);
+            setPreviewUrl(user.profilePhoto)
         }
         setIsEditMode(!isEditMode);
     };
@@ -41,10 +41,7 @@ export default function Settings() {
                 setFullName(data.fullName); // Set the initial full name
             });
         }
-
-        setTempPreviewUrl(user?.profilePhoto || '');
-
-    }, [currentUser.uid, getUserData, isEditMode, uploaded, user?.profilePhoto]);
+    }, [currentUser.uid, getUserData, isEditMode, uploaded]);
 
     const handleFullNameChange = (e) => {
         setFullName(e.target.value);
@@ -53,8 +50,8 @@ export default function Settings() {
     const handleImageChange = (e) => {
         if (e.target.files[0]) {
             setImage(e.target.files[0]);
-            setPreviewUrl(URL.createObjectURL(e.target.files[0]));
-            setUploaded(true)
+            setTempPreviewUrl(URL.createObjectURL(e.target.files[0]));
+            setUploaded(true);
         }
     };
 
@@ -82,7 +79,9 @@ export default function Settings() {
 
 
     const handleClearPhoto = () => {
-        setTempPreviewUrl(null);
+        setUploaded(false)
+        setPreviewUrl(null);
+        setTempPreviewUrl(null)
         setShowInitials(true); // Indicate that initials should be shown
     };
 
