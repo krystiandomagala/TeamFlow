@@ -4,11 +4,18 @@ import { ReactComponent as DotsIcon } from '../../assets/ellipsis-vertical.svg'
 import { ReactComponent as CalendarIcon } from '../../assets/calendar-filled.svg'
 import { ReactComponent as ArrowUpIcon } from '../../assets/arrow-up.svg'
 import { ReactComponent as ArrowDownIcon } from '../../assets/arrow-down.svg'
-import { deleteDoc, doc, updateDoc } from 'firebase/firestore'
+import { deleteDoc, doc, updateDoc, Timestamp } from 'firebase/firestore'
 import { db } from '../../firebase'
-import { Button, Dropdown, Form, Modal } from 'react-bootstrap'
+import { Button, Dropdown, Form, Modal, ModalBody, ModalFooter } from 'react-bootstrap'
 import AvatarMini from './AvatarMini'
 import { useAuth } from '../../contexts/AuthContext'
+import ToggleSwitch from '../common/ToggleSwitch'
+import Select from 'react-select';
+import { useUser } from '../../contexts/UserContext'
+import SubtaskItemEdit from './SubtaskItemEdit'
+import useTeamExists from '../../hooks/useTeamExists'
+import { UserTeamDataProvider, useUserTeamData } from '../../contexts/TeamContext'
+import EditTaskModal from './EditTaskModal'
 
 export default function TaskItem({ task, teamId }) {
 
@@ -18,6 +25,11 @@ export default function TaskItem({ task, teamId }) {
     const { currentUser } = useAuth()
     const isPinnedByCurrentUser = task.pinned.includes(currentUser.uid);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+
+    const handleEditClick = () => {
+        setShowEditModal(true);
+    };
 
     const handleRemoveClick = () => {
         setShowConfirmModal(true);
@@ -37,7 +49,6 @@ export default function TaskItem({ task, teamId }) {
             console.error('Error removing task: ', error);
         }
     };
-
     const togglePinTask = async () => {
         const taskRef = doc(db, 'teams', teamId, 'tasks', task.id);
         try {
@@ -55,7 +66,6 @@ export default function TaskItem({ task, teamId }) {
     const toggleExpand = () => {
         setIsExpanded(!isExpanded);
     };
-
     useEffect(() => {
         if (contentRef.current) {
             setMaxHeight(isExpanded ? contentRef.current.scrollHeight : 0);
@@ -91,6 +101,9 @@ export default function TaskItem({ task, teamId }) {
     const stateClass = getStateClass(task.state);
 
     const convertTimestampToDate = (timestamp) => {
+        if (!timestamp || !timestamp.seconds) {
+            return 'Nieokreślona data'; // lub inna domyślna wartość
+        }
         const date = new Date(timestamp.seconds * 1000);
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
@@ -101,6 +114,9 @@ export default function TaskItem({ task, teamId }) {
 
     const calculateCompletedPercentage = () => {
         const totalSubtasks = task.subtasks.length;
+        if (totalSubtasks === 0) {
+            return 0; // Jeśli nie ma subtasków, zwróć 0%
+        }
         const completedSubtasks = task.subtasks.filter(subtask => subtask.isCompleted).length;
         return (completedSubtasks / totalSubtasks) * 100;
     };
@@ -116,8 +132,6 @@ export default function TaskItem({ task, teamId }) {
         return description;
     }
     const truncatedDescription = truncateDescription(task.description);
-
-
 
     return (
         <div className='task-item p-3 rounded-4 my-2 '>
@@ -137,7 +151,7 @@ export default function TaskItem({ task, teamId }) {
                         <DotsIcon />
                     </Dropdown.Toggle>
                     <Dropdown.Menu >
-                        <Dropdown.Item>Edit</Dropdown.Item>
+                        <Dropdown.Item onClick={handleEditClick}>Edit</Dropdown.Item>
                         <Dropdown.Item onClick={togglePinTask}> {isPinnedByCurrentUser ? 'Unpin' : 'Pin'}</Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Item onClick={handleRemoveClick}>Remove</Dropdown.Item>
@@ -174,11 +188,11 @@ export default function TaskItem({ task, teamId }) {
                 <div className='progress' style={{ maxWidth: "350px" }}>
                     <div className="progress-bar bg-primary" style={{ width: `${completedPercentage}%` }}></div>
                 </div>
-                <span className='progress-number'>{completedPercentage.toFixed(0)}%</span>
+                <span className='progress-number'>{calculateCompletedPercentage().toFixed(0)}%</span>
             </div>
-            <div className='mt-1 d-flex align-items-center mt-3'>
-                {task.assignedUsers.slice(0, 3).map((user) => (
-                    <AvatarMini key={user} userId={user} />
+            <div className='mt-1 d-flex align-items-center mt-3 no-outline'>
+                {task.assignedUsers.slice(0, 3).map((user, index) => (
+                    <AvatarMini key={index} userId={user} />
                 ))}
                 {task.assignedUsers.length > 3 && (
                     <span className='ps-2 num-of-hidden-users'>+{task.assignedUsers.length - 3}</span>
@@ -189,23 +203,31 @@ export default function TaskItem({ task, teamId }) {
                 {isExpanded && (
                     <div className='mt-3'>
                         <h5>Subtasks</h5>
-                        {task.subtasks.map((subtask, index) => (
-                            <div key={index}>
+                        {task.subtasks.length ? task.subtasks.map((subtask, index) => (
+                            <div key={index} className='d-flex my-2 gap-3 align-items-center justify-content-between p-3 rounded-3 subtask-item'>
                                 <Form.Check
                                     type="checkbox"
                                     label={subtask.name}
                                     checked={subtask.isCompleted}
                                     disabled={true}
                                 />
-
+                                <div>
+                                    {subtask.assignedUsers.length ? subtask.assignedUsers.map((userId, index) => (<AvatarMini userId={userId} />)) : <span className='lack-of-data'>No users assigned</span>}
+                                </div>
                             </div>
-                        ))}
+                        )) : <span className='lack-of-data'>No subtasks</span>}
                     </div>
                 )}
             </div>
             <div className='d-flex justify-content-end me-1 show-less-more' onClick={toggleExpand}>
                 {isExpanded ? <ArrowUpIcon /> : <ArrowDownIcon />}
             </div>
+            <EditTaskModal
+                show={showEditModal}
+                handleClose={() => setShowEditModal(false)}
+                task={task}
+            />
         </div>
     )
 }
+

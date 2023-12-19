@@ -66,7 +66,7 @@ export default function SubtaskItem({ subtask, index, updateSubtask, removeSubta
                             </Dropdown.Menu>
                         </Dropdown>
                     </div>
-                    {selectedSubtaskUser.length !== 0 ? (<div>
+                    {selectedSubtaskUser.length > 0 ? (<div>
                         {selectedSubtaskUser.map(user => (
                             <span key={user.value} className="badge bg-primary me-2">{user.label}</span>
                         ))}

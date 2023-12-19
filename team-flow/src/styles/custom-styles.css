@@ -81,6 +81,9 @@ h2 {
   font-size: 1.2rem;
 }
 
+.subtask-item .avatar-mini{
+  outline-color:  #d9ebff;
+}
 .avatar:hover {
   filter: opacity(80%);
 }
@@ -162,8 +165,9 @@ box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
   font-weight: 900;
 }
 
-.divider {
+.team-card-divider {
   margin: 5px 0;
+  color: #828282;
 }
 
 .progress{
@@ -378,10 +382,13 @@ box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
       counter-reset: custom-counter; /* Resetowanie niestandardowego licznika */
 }
 
-
-.subtask-list-add .subtask-item{
+.subtask-item{
   display: flex;
   background-color: #d9ebff;
+  
+  outline-color: #d9ebff;
+}
+.subtask-list-add .subtask-item{
   padding: 10px;
   border-radius: 6px;
 }
@@ -429,4 +436,9 @@ box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 .show-less-more{
   cursor: pointer;
   color: #828282;
+}
+
+.lack-of-data{
+  font-style: italic;
+  color: #5b5b5d;
 }

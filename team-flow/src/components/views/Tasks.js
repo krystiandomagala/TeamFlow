@@ -362,13 +362,13 @@ export default function Tasks() {
             return <TaskItem key={task.id} task={task} teamId={teamId} />;
           })}
         </div>
-        {tasks.length > 1 && (
+        {userTasks.length > 1 && (
           <div onClick={toggleUserTasks} className='show-less-more'>
             {isUserTasksExpanded ? <><ArrowUpIcon /> Show less </> : <> <ArrowDownIcon />Show more</>}
           </div>
         )}
 
       </div>
-    </MainLayout >
+    </MainLayout>
   );
 }
