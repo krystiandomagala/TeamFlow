@@ -5,7 +5,7 @@ import useTeamExists from '../../hooks/useTeamExists';
 import TaskItem from '../common/TaskItem';
 import { addDoc, collection, Timestamp, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase'; // ścieżka do Twojej konfiguracji Firebase
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Button, Dropdown, Form, Modal } from 'react-bootstrap';
 import { useUserTeamData } from '../../contexts/TeamContext';
 import Select from 'react-select';
 import AvatarMini from '../common/AvatarMini';
@@ -15,6 +15,15 @@ import SubtaskItem from '../common/SubtaskItem';
 import { ReactComponent as ArrowUpIcon } from '../../assets/arrow-up.svg'
 import { ReactComponent as ArrowDownIcon } from '../../assets/arrow-down.svg'
 import { useAuth } from '../../contexts/AuthContext';
+
+const sortOptions = [
+  { label: 'deadline: ascending', value: 'deadline_asc' },
+  { label: 'deadline: descending', value: 'deadline_desc' },
+  { label: 'title: ascending', value: 'title_asc' },
+  { label: 'title: descending', value: 'title_desc' },
+  { label: 'progress: ascending', value: 'progress_asc' },
+  { label: 'progress: descending', value: 'progress_desc' }
+];
 
 export default function Tasks() {
   const [showModal, setShowModal] = useState(false);
@@ -34,10 +43,43 @@ export default function Tasks() {
   const [modalPage, setModalPage] = useState(1);
   const [isTeamTasksExpanded, setIsTeamTasksExpanded] = useState(false);
   const [isUserTasksExpanded, setIsUserTasksExpanded] = useState(false);
+  const [isPinnedTasksExpanded, setIsPinnedTasksExpanded] = useState(false);
+  const [pinnedTasks, setPinnedTasks] = useState([]);
+  const [sortOptionTeam, setSortOptionTeam] = useState('deadline_asc');
+  const [sortOptionYour, setSortOptionYour] = useState('deadline_asc');
+  const [sortOptionPinned, setSortOptionPinned] = useState('deadline_asc');
+
+  const sortTasks = (tasks, option) => {
+    switch (option) {
+      case 'deadline_asc':
+        return [...tasks].sort((a, b) => a.deadline.seconds - b.deadline.seconds);
+      case 'deadline_desc':
+        return [...tasks].sort((a, b) => b.deadline.seconds - a.deadline.seconds);
+      case 'title_asc':
+        return [...tasks].sort((a, b) => a.title.localeCompare(b.title));
+      case 'title_desc':
+        return [...tasks].sort((a, b) => b.title.localeCompare(a.title));
+      case 'progress_asc':
+        // Założenie: progres to ilość ukończonych podzadań
+        return [...tasks].sort((a, b) => a.subtasks.filter(s => s.isCompleted).length - b.subtasks.filter(s => s.isCompleted).length);
+      case 'progress_desc':
+        return [...tasks].sort((a, b) => b.subtasks.filter(s => s.isCompleted).length - a.subtasks.filter(s => s.isCompleted).length);
+      default:
+        return tasks;
+    }
+  };
 
   const { currentUser } = useAuth();
-
   const userTasks = tasks.filter(task => task.assignedUsers.includes(currentUser.uid));
+
+  useEffect(() => {
+    // Filtruj zadania przypięte przez bieżącego użytkownika
+    const filteredPinnedTasks = tasks.filter(task =>
+      task.pinned.includes(currentUser.uid)
+    );
+    setPinnedTasks(filteredPinnedTasks);
+  }, [tasks, currentUser.uid]); // Zależności: zmiana zadań lub ID użytkownika
+
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -63,6 +105,10 @@ export default function Tasks() {
 
   const toggleUserTasks = () => {
     setIsUserTasksExpanded(!isUserTasksExpanded);
+  };
+
+  const togglePinnedTasks = () => {
+    setIsPinnedTasksExpanded(!isPinnedTasksExpanded);
   };
 
   useEffect(() => {
@@ -212,6 +258,11 @@ export default function Tasks() {
     }));
   };
 
+  const getSortLabel = (value) => {
+    const option = sortOptions.find(option => option.value === value);
+    return option ? option.label : 'Unknown';
+  };
+
   return (
     <MainLayout>
       <div className='my-3 pe-3 d-flex flex-column w-100' style={{ overflowY: 'auto' }}>
@@ -333,10 +384,22 @@ export default function Tasks() {
             Team tasks
           </span>
         </div>
+        {tasks.length > 1 && (
+          <Dropdown>
+            <Dropdown.Toggle variant="light" id="dropdown-team">
+              {getSortLabel(sortOptionTeam)}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {sortOptions.map(option => (
+                <Dropdown.Item key={option.value} onClick={() => setSortOptionTeam(option.value)}>
+                  {option.label}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        )}
         <div className='d-flex flex-column'>
-
-          {tasks.map((task, index) => {
-            // Render only the first item if the list is not expanded
+          {sortTasks(tasks, sortOptionTeam).map((task, index) => {
             if (!isTeamTasksExpanded && index > 0) return null;
 
             return <TaskItem key={task.id} task={task} teamId={teamId} />;
@@ -353,14 +416,31 @@ export default function Tasks() {
             Your tasks
           </span>
         </div>
+        {userTasks.length > 1 && (
+          <Dropdown>
+            <Dropdown.Toggle variant="light" id="dropdown-team">
+              {getSortLabel(sortOptionYour)}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {sortOptions.map(option => (
+                <Dropdown.Item key={option.value} onClick={() => setSortOptionYour(option.value)}>
+                  {option.label}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        )}
         <div className='d-flex flex-column'>
-
-          {userTasks.map((task, index) => {
-            // Render only the first item if the list is not expanded
+          {userTasks.length < 1 && (
+            <span className="lack-of-data mt-3">
+              No tasks assigned
+            </span>)}
+          {sortTasks(userTasks, sortOptionYour).map((task, index) => {
             if (!isUserTasksExpanded && index > 0) return null;
 
             return <TaskItem key={task.id} task={task} teamId={teamId} />;
           })}
+
         </div>
         {userTasks.length > 1 && (
           <div onClick={toggleUserTasks} className='show-less-more'>
@@ -368,6 +448,44 @@ export default function Tasks() {
           </div>
         )}
 
+
+        <div className="divider mb-3 mt-5">
+          <span>
+            Pinned tasks
+          </span>
+        </div>
+        {pinnedTasks.length > 1 && (
+          <Dropdown>
+            <Dropdown.Toggle variant="light" id="dropdown-team">
+              {getSortLabel(sortOptionPinned)}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              {sortOptions.map(option => (
+                <Dropdown.Item key={option.value} onClick={() => setSortOptionPinned(option.value)}>
+                  {option.label}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        )}
+        <div className='d-flex flex-column'>
+          {pinnedTasks.length < 1 && (
+            <span className="lack-of-data mt-3">
+              No pinned tasks
+            </span>
+          )}
+
+          {sortTasks(pinnedTasks, sortOptionPinned).map((task, index) => {
+            if (!isPinnedTasksExpanded && index > 0) return null;
+
+            return <TaskItem key={task.id} task={task} teamId={teamId} />;
+          })}
+        </div>
+        {pinnedTasks.length > 1 && (
+          <div onClick={togglePinnedTasks} className='show-less-more'>
+            {isPinnedTasksExpanded ? <><ArrowUpIcon /> Show less </> : <> <ArrowDownIcon />Show more</>}
+          </div>
+        )}
       </div>
     </MainLayout>
   );
