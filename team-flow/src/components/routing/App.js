@@ -19,6 +19,7 @@ import NotFound from '../views/NotFound';
 import Settings from '../views/Settings';
 import { UserProvider } from '../../contexts/UserContext';
 import { ChatProvider } from '../../contexts/ChatContext';
+
 function App() {
   return (
     <Router>

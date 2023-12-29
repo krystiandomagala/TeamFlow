@@ -384,6 +384,10 @@ export default function Tasks() {
             Team tasks
           </span>
         </div>
+        {tasks.length < 1 && (
+          <span className="lack-of-data mt-3">
+            No tasks in your team
+          </span>)}
         {tasks.length > 1 && (
           <Dropdown>
             <Dropdown.Toggle variant="light" id="dropdown-team">

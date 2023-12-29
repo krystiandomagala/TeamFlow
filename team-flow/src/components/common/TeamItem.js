@@ -30,7 +30,7 @@ export default function TeamItem({ team }) {
         <p className='subtitle'>Opis teamu</p>
         <span className='mini-title'>Members</span>
         <div className='mt-1 d-flex'>
-          {team.memberIds.slice(0, 3).map((user) => (
+          {team.memberIds.slice(0, 3).map((user, index) => (
             <AvatarMini key={user} userId={user} />
           ))}
 

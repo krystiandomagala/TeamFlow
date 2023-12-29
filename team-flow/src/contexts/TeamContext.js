@@ -101,8 +101,24 @@ export const UserTeamDataProvider = ({ children }) => {
     }
   };
 
+  async function isUserTeamAdmin(teamId) {
+    const teamDocRef = doc(db, 'teams', teamId);
+    try {
+      const docSnap = await getDoc(teamDocRef);
+      if (docSnap.exists()) {
+        const teamData = docSnap.data();
+        return teamData.adminIds.includes(currentUser.uid);
+      } else {
+        console.log('Team not found');
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking team admin status: ", error);
+      return false;
+    }
+  }
   // Przekazanie wartości do kontekstu
-  const value = { createTeam, joinTeam, lastTeamId, getUserTeams, getTeamData, setLastTeamId: setAndPersistLastTeamId };
+  const value = { createTeam, joinTeam, lastTeamId, getUserTeams, getTeamData, setLastTeamId: setAndPersistLastTeamId, isUserTeamAdmin };
 
   // Zawijanie dzieci w Provider kontekstu
   return <UserTeamDataContext.Provider value={value}>{children}</UserTeamDataContext.Provider>;

@@ -191,8 +191,8 @@ export default function TaskItem({ task, teamId }) {
                 <span className='progress-number'>{calculateCompletedPercentage().toFixed(0)}%</span>
             </div>
             <div className='mt-1 d-flex align-items-center mt-3 no-outline'>
-                {task.assignedUsers.slice(0, 3).map((user, index) => (
-                    <AvatarMini key={index} userId={user} />
+                {task.assignedUsers.slice(0, 3).map((user) => (
+                    <AvatarMini key={user} userId={user} />
                 ))}
                 {task.assignedUsers.length > 3 && (
                     <span className='ps-2 num-of-hidden-users'>+{task.assignedUsers.length - 3}</span>
@@ -212,7 +212,7 @@ export default function TaskItem({ task, teamId }) {
                                     disabled={true}
                                 />
                                 <div>
-                                    {subtask.assignedUsers.length ? subtask.assignedUsers.map((userId, index) => (<AvatarMini userId={userId} />)) : <span className='lack-of-data'>No users assigned</span>}
+                                    {subtask.assignedUsers.length ? subtask.assignedUsers.map((userId) => (<AvatarMini userId={userId} />)) : <span className='lack-of-data'>No users assigned</span>}
                                 </div>
                             </div>
                         )) : <span className='lack-of-data'>No subtasks</span>}
