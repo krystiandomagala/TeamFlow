@@ -361,6 +361,21 @@ h2 {
 .shift-item {
   background-color: #fbfbfb;
   transition: background-color 0.15s ease-in-out;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.shift-item {
+  background-color: #1271fb;
+  color: white;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.shift-item .hours{
+  color:rgba(255, 255, 255, 0.6);
+}
+
+.shift-item:hover {
+  background-color: #126ffbc4;
 }
 
 .task-item:hover,
@@ -503,10 +518,44 @@ input[type='checkbox'] + label {
 table {
   border-collapse: collapse !important;
   border-style: hidden !important;
+  table-layout: fixed;
 }
+
+.table-week-view tr th:nth-child(1){
+  width: 150px;
+}
+
 
 tr .today {
   color: #1271fb;
 }
 
 
+.highlight{
+  background-color: #dcf3e9 !important;
+  transition: background-color 0.2s;
+}
+
+
+.ooo{
+  background-color: #ff9a1f !important;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.ooo:hover{
+  background-color: #ff9a1f9d !important;
+}
+
+.vacation{
+  background-color: #00D370 !important;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.vacation:hover{
+  background-color: #00d3708a !important;
+}
+
+.remove-icon {
+    cursor: pointer;
+    color: white important!;
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Form, Alert } from 'react-bootstrap';
 import useTeamExists from '../../hooks/useTeamExists';
 import { db } from '../../firebase';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 
 function ShiftManager() {
     const [shifts, setShifts] = useState([]);
@@ -32,7 +33,7 @@ function ShiftManager() {
         if (error) {
             const timer = setTimeout(() => {
                 setError('');
-            }, 3000); // Error message will disappear after 3000 milliseconds (3 seconds)
+            }, 2000); // Error message will disappear after 3000 milliseconds (3 seconds)
             return () => clearTimeout(timer);
         }
     }, [error]);
@@ -61,11 +62,23 @@ function ShiftManager() {
             });
     };
 
+    const handleOnDragEnd = (result) => {
+        if (!result.destination) return;
+
+        const items = Array.from(shifts);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        setShifts(items);
+    };
 
     return (
-        <div className='d-flex'>
+        <div className='d-flex gap-4'>
             <div>
                 <h2>Add New Shift</h2>
+                <p className='subtitle'>
+                    Create shifts
+                </p>
                 <Form>
                     <Form.Group>
                         <Form.Label>Shift Label</Form.Label>
@@ -103,13 +116,36 @@ function ShiftManager() {
                     )}
                 </Form>
             </div>
-            <div className='d-flex flex-column gap-2'>
-                {shifts.map((shift, index) => (
-                    <div key={index} className='shift-item py-2 rounded-3' style={{ minWidth: "160px", padding: "0 15px" }}>
-                        <b>{shift.name}</b>
-                        <div className='hours'>{shift.startTime} - {shift.endTime}</div>
-                    </div>
-                ))}
+            <div className='d-flex flex-column'>
+                <DragDropContext onDragEnd={handleOnDragEnd}>
+                    <Droppable droppableId="shifts">
+                        {(provided) => (
+                            <div
+                                {...provided.droppableProps}
+                                ref={provided.innerRef}
+                                className='d-flex flex-column'
+                            >
+                                {shifts.map((shift, index) => (
+                                    <Draggable key={shift.id} draggableId={shift.id} index={index}>
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                className={`shift-item py-2 my-1 rounded-3 ${snapshot.isDragging ? 'dragging' : ''}`}
+                                                style={{ ...provided.draggableProps.style, padding: "0 15px" }}
+                                            >
+                                                <b>{shift.name}</b>
+                                                <div className='hours'>{shift.startTime} - {shift.endTime}</div>
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+                </DragDropContext>
             </div>
         </div>
     );
