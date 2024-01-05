@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useUserTeamData } from '../../contexts/TeamContext';
 import useTeamExists from '../../hooks/useTeamExists';
 import AvatarMini from './AvatarMini'
-import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ChevronLeft, ChevronRight } from 'react-bootstrap-icons';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -35,7 +35,40 @@ const Calendar = () => {
         return itemDate.isBefore(moment(), 'day'); // 'day' sprawdza tylko datę bez czasu
     };
 
-    console.log(tasks)
+    useEffect(() => {
+        teamUsers.forEach(user => {
+            const userShiftsRef = collection(db, 'teams', teamId, 'teamMembers', user.uid, 'shiftItems');
+
+            getDocs(userShiftsRef).then(snapshot => {
+                snapshot.docs.forEach(doc => {
+                    const shiftItem = doc.data();
+                    const cellId = `${user.uid}_${shiftItem.date}`;
+
+                    setCalendarShifts(prevShifts => ({
+                        ...prevShifts,
+                        [cellId]: shiftItem
+                    }));
+                });
+            });
+        });
+    }, [teamId, teamUsers]);
+
+
+
+    const finishEditing = () => {
+        Object.entries(calendarShifts).forEach(([cellId, shiftData]) => {
+            const [userId, date] = cellId.split('_'); // Zakładając, że cellId to 'userId_date'
+            const userShiftsRef = doc(db, 'teams', teamId, 'teamMembers', userId, 'shiftItems', cellId);
+
+            setDoc(userShiftsRef, {
+                ...shiftData,
+                date: date
+            });
+        });
+    };
+
+
+
     useEffect(() => {
         const unsubscribe = onSnapshot(
             collection(db, 'teams', teamId, 'tasks'),
@@ -62,6 +95,7 @@ const Calendar = () => {
     const tdRef = useRef(null); // Ref dla komórki tabeli
 
     const toggleEditMode = () => {
+        if (isEditMode) finishEditing()
         setIsEditMode(!isEditMode);
     };
 
@@ -142,8 +176,9 @@ const Calendar = () => {
 
         const shiftToAdd = {
             ...newShift,
-            name: newShift.name.trim() === '' ? (shiftType === 'shift' ? 'Shift' : 'OOO') : newShift.name,
-            type: shiftType
+            name: newShift.name.trim() === '' ? (shiftType === 'shift' ? 'Shift' : 'OOO') : newShift.name.trim(),
+            type: shiftType,
+            isActive: true
         };
 
         const collectionRef = db.collection('teams').doc(teamId).collection(shiftType === 'shift' ? 'shifts' : 'ooos');
@@ -302,8 +337,7 @@ const Calendar = () => {
                             </td>
                             {new Array(7).fill(null).map((_, dayIndex) => {
                                 const dayDate = currentMoment.clone().startOf('isoWeek').add(dayIndex, 'days').format('YYYY-MM-DD');
-                                console.log(dayDate)
-                                const cellId = `${employee.uid}${dayDate}`;
+                                const cellId = `${employee.uid}_${dayDate}`;
                                 const cellData = calendarShifts[cellId] || {};
                                 const shiftItem = shifts.find(s => s.id === cellData.shiftId);
                                 const oooItem = ooos.find(o => o.id === cellData.oooId);
@@ -438,7 +472,7 @@ const Calendar = () => {
                 <thead>
                     <tr>
                         {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((dayName) => (
-                            <th ey={dayName}>{dayName}</th>
+                            <th key={dayName}>{dayName}</th>
                         ))}
                     </tr>
                 </thead>
@@ -468,34 +502,44 @@ const Calendar = () => {
     };
 
     const removeShift = async (shiftId) => {
-
-
         try {
-            // Delete the shift from Firebase
-            await db.collection('teams').doc(teamId).collection('shifts').doc(shiftId).delete();
+            const shiftRef = doc(db, 'teams', teamId, 'shifts', shiftId);
+            await updateDoc(shiftRef, { isActive: false });  // Zarchiwizuj shift
 
-            // Filter out the shift from the local state
-            setShifts(shifts.filter(shift => shift.id !== shiftId));
+            setShifts(prevShifts => prevShifts.filter(shift => shift.id !== shiftId));
 
-            // Optional: Show a success message to the user
         } catch (error) {
-            console.error("Error removing shift:", error);
-            // Optional: Show an error message to the user
+            console.error("Error archiving shift:", error);
         }
     };
 
     const removeOOO = async (oooId) => {
         try {
-            await db.collection('teams').doc(teamId).collection('ooos').doc(oooId).delete();
+            const OOORef = doc(db, 'teams', teamId, 'ooos', oooId);
+            await updateDoc(OOORef, { isActive: false });  // Zarchiwizuj shift
 
-            setOOOs(ooos.filter(ooo => ooo.id !== oooId));
-
+            setOOOs(prevOOOs => prevOOOs.map(ooo => ooo.id === oooId ? { ...ooo, isActive: false } : ooo));
             // Optional: Show success feedback
         } catch (error) {
             console.error("Error removing OOO:", error);
             // Optional: Show error feedback
         }
     };
+
+    const isDropAllowed = (draggableId, droppableId) => {
+        // Zakładając, że draggableId zawiera informacje o typie (np. 'shift', 'ooo', 'vacation')
+        const itemType = draggableId.split('-')[0]; // Przykład, jak otrzymać typ
+
+        // Określ zasady, które określają dopuszczalność dropu
+        if (droppableId === 'vacations' && itemType !== 'vacation') {
+            return false;
+        }
+        // Dodaj więcej zasad tutaj w razie potrzeby
+        return true;
+    };
+
+    const availableShifts = shifts.filter(shift => shift.isActive);
+    const availableOOOs = ooos.filter(ooo => ooo.isActive);
 
     return (
         <DragDropContext onDragEnd={handleOnDragEnd}>
@@ -574,14 +618,14 @@ const Calendar = () => {
                                     Shifts
                                 </span>
                             </div>
-                            <Droppable droppableId="shifts" direction='horizontal'>
+                            <Droppable droppableId="shifts" direction='horizontal' isDropDisabled={(draggableId) => !isDropAllowed(draggableId, 'shifts')}>
                                 {(provided) => (
                                     <div
                                         {...provided.droppableProps}
                                         ref={provided.innerRef}
                                         className='d-flex'
                                     >
-                                        {shifts.map((shift, index) => (
+                                        {availableShifts.map((shift, index) => (
                                             <Draggable key={shift.id} draggableId={shift.id} index={index}>
                                                 {(provided, snapshot) => (
                                                     <div
@@ -609,10 +653,10 @@ const Calendar = () => {
                                     Out Of Office
                                 </span>
                             </div>
-                            <Droppable droppableId='ooo' direction='horizontal'>
+                            <Droppable droppableId='ooo' direction='horizontal' isDropDisabled={(draggableId) => !isDropAllowed(draggableId, 'ooo')}>
                                 {(provided) => (
                                     <div {...provided.droppableProps} ref={provided.innerRef} className='d-flex'>
-                                        {ooos.map((ooo, index) => (
+                                        {availableOOOs.map((ooo, index) => (
                                             <Draggable key={ooo.id} draggableId={ooo.id} index={index}>
                                                 {(provided, snapshot) => (
                                                     <div ref={provided.innerRef}
@@ -639,7 +683,7 @@ const Calendar = () => {
                                     Vacations
                                 </span>
                             </div>
-                            <Droppable droppableId='vacations' direction='horizontal'>
+                            <Droppable droppableId='vacations' direction='horizontal' isDropDisabled={(draggableId) => !isDropAllowed(draggableId, 'vacations')}>
                                 {(provided) => (
                                     <div {...provided.droppableProps} ref={provided.innerRef} className='d-flex'>
                                         <Draggable draggableId={vacationItem.id} index={1}>
