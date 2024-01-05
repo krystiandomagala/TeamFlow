@@ -72,6 +72,9 @@ export default function TaskItem({ task, teamId }) {
         }
     }, [isExpanded]);
 
+
+
+
     function getPriorityClass(priority) {
         switch (priority) {
             case 'high':
@@ -86,19 +89,44 @@ export default function TaskItem({ task, teamId }) {
     }
     const priorityClass = getPriorityClass(task.priority);
 
+
+
+    const calculateTaskStatus = () => {
+        const currentTimestamp = new Date().getTime();
+        const deadlineTimestamp = new Date(task.deadline.seconds * 1000).getTime();
+
+        const allSubtasksCompleted = task.subtasks.every(subtask => subtask.isCompleted);
+        const hasSubtasks = task.subtasks.length > 0;
+
+        if (!hasSubtasks) {
+            if (currentTimestamp > deadlineTimestamp) return 'Late'
+            if (currentTimestamp <= deadlineTimestamp) return 'In progress'
+        }
+
+        if (allSubtasksCompleted) {
+            return 'Done';
+        } else if (currentTimestamp > deadlineTimestamp) {
+            return 'Late';
+        } else if (!hasSubtasks || currentTimestamp <= deadlineTimestamp) {
+            return 'In progress';
+        }
+    };
+
+    const taskStatus = calculateTaskStatus();
+    const stateClass = getStateClass(taskStatus);
+
     function getStateClass(state) {
         switch (state) {
-            case 'late':
+            case 'Late':
                 return 'task-late';
-            case 'in progress':
+            case 'In progress':
                 return 'task-in-progress';
-            case 'done':
+            case 'Done':
                 return 'task-done';
             default:
                 return '';
         }
     }
-    const stateClass = getStateClass(task.state);
 
     const convertTimestampToDate = (timestamp) => {
         if (!timestamp || !timestamp.seconds) {
@@ -143,11 +171,11 @@ export default function TaskItem({ task, teamId }) {
                     </span>
                     <div className='d-flex align-items-center gap-1 task-progress'>
                         <span className={`progress-icon ${stateClass}`}></span>
-                        <span>In progress</span>
+                        <span>{taskStatus}</span>
                     </div>
                 </div>
                 <Dropdown>
-                    <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none' }} bsPrefix='p-0'>
+                    <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none', color: "black" }} bsPrefix='p-0'>
                         <DotsIcon />
                     </Dropdown.Toggle>
                     <Dropdown.Menu >

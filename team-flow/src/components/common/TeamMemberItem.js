@@ -63,7 +63,7 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam }) {
             </div>
             {isCurrentUserAdmin && currentUser.uid !== member.uid && (
                 <Dropdown>
-                    <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none' }} bsPrefix='p-0'>
+                    <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none', color: 'black' }} bsPrefix='p-0'>
                         <DotsIcon />
                     </Dropdown.Toggle>
                     <Dropdown.Menu >
@@ -75,7 +75,7 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam }) {
 
             {currentUser.uid === member.uid && (
                 <Dropdown>
-                    <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none' }} bsPrefix='p-0'>
+                    <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none', color: 'black' }} bsPrefix='p-0'>
                         <DotsIcon />
                     </Dropdown.Toggle>
                     <Dropdown.Menu>

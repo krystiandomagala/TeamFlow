@@ -217,7 +217,6 @@ export default function Tasks() {
       creationDate: Timestamp.fromDate(new Date()), // Przykład
       deadline: Timestamp.fromDate(new Date(taskDeadline)),
       priority: priority,
-      state: 'in progress',
       assignedUsers: assignedUserIds,
       subtasks: preparedSubtasks,
       pinned: []

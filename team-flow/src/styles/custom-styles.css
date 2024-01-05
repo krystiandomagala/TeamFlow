@@ -362,6 +362,9 @@ h2 {
   background-color: #fbfbfb;
   transition: background-color 0.15s ease-in-out;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+
 }
 
 .shift-item {
@@ -372,6 +375,8 @@ h2 {
 
 .shift-item .hours{
   color:rgba(255, 255, 255, 0.6);
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .shift-item:hover {
@@ -511,10 +516,6 @@ input[type='checkbox'] + label {
   font-weight: 500;
 }
 
-.table-month-view {
-  table-layout: fixed;
-}
-
 table {
   border-collapse: collapse !important;
   border-style: hidden !important;
@@ -530,10 +531,13 @@ tr .today {
   color: #1271fb;
 }
 
-
 .highlight{
   background-color: #dcf3e9 !important;
   transition: background-color 0.2s;
+}
+
+.table-month-view tbody tr{
+  height: 150px;
 }
 
 
@@ -558,4 +562,12 @@ tr .today {
 .remove-icon {
     cursor: pointer;
     color: white important!;
+}
+
+.tooltip-left-align .tooltip-inner {
+    text-align: left;
+}
+
+.tooltip-inner .avatar-mini{
+  outline-color: #000;
 }

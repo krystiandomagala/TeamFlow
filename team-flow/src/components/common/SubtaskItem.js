@@ -57,7 +57,7 @@ export default function SubtaskItem({ subtask, index, updateSubtask, removeSubta
                     <div className='d-flex justify-content-between align-items-center'>
                         <li>{subtask.name}</li>
                         <Dropdown className='p-0'>
-                            <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none' }} className='d-flex align-items-center' bsPrefix='p-0'>
+                            <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none', color: 'black' }} className='d-flex align-items-center' bsPrefix='p-0'>
                                 <DotsIcon />
                             </Dropdown.Toggle>
                             <Dropdown.Menu style={{ position: 'absolute' }} >
