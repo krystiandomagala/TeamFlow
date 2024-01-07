@@ -29,6 +29,42 @@ const Calendar = () => {
     const [isEditMode, setIsEditMode] = useState(false);
     const vacationItem = { id: "1", name: "Vacations", type: "vacation" };
     const [tasks, setTasks] = useState([]);
+    const [workingHours, setWorkingHours] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchWorkingHours = async () => {
+            if (isEditMode) {
+                setIsLoading(true);
+                const fetchedWorkingHours = {};
+
+                for (const user of teamUsers) {
+                    const userWorkingHoursRef = doc(db, 'teams', teamId, 'teamMembers', user.uid, 'workingHours', currentMoment.format('YYYY-MM'));
+
+                    try {
+                        const docSnap = await getDoc(userWorkingHoursRef);
+                        if (docSnap.exists()) {
+                            fetchedWorkingHours[user.uid] = docSnap.data().hours;
+                        } else {
+                            fetchedWorkingHours[user.uid] = ''; // Brak danych o godzinach pracy
+                        }
+                    } catch (error) {
+                        console.error('Błąd podczas pobierania godzin pracy:', error);
+                    }
+                }
+
+                setWorkingHours(fetchedWorkingHours);
+                setIsLoading(false);
+            }
+        };
+
+        fetchWorkingHours();
+    }, [isEditMode, teamUsers, teamId, currentMoment]);
+
+
+    const handleWorkingHoursChange = (userId, hours) => {
+        setWorkingHours(prev => ({ ...prev, [userId]: hours }));
+    };
 
     const isDatePast = (dateString) => {
         const itemDate = moment(dateString);
@@ -55,16 +91,27 @@ const Calendar = () => {
 
 
 
-    const finishEditing = () => {
+    const finishEditing = async () => {
         Object.entries(calendarShifts).forEach(([cellId, shiftData]) => {
             const [userId, date] = cellId.split('_'); // Zakładając, że cellId to 'userId_date'
             const userShiftsRef = doc(db, 'teams', teamId, 'teamMembers', userId, 'shiftItems', cellId);
 
+            console.log('date: ', date)
+            console.log('shiftData: ', shiftData)
             setDoc(userShiftsRef, {
                 ...shiftData,
                 date: date
             });
         });
+
+        for (const [userId, hours] of Object.entries(workingHours)) {
+            const userWorkingHoursRef = doc(db, 'teams', teamId, 'teamMembers', userId, 'workingHours', currentMoment.format('YYYY-MM'));
+            try {
+                await setDoc(userWorkingHoursRef, { hours: hours || 0 });
+            } catch (error) {
+                console.error('Błąd podczas zapisywania godzin pracy:', error);
+            }
+        }
     };
 
 
@@ -296,6 +343,37 @@ const Calendar = () => {
         return daysOfWeek;
     };
 
+    const calculateTotalShiftHours = (userId) => {
+        const startOfMonth = currentMoment.clone().startOf('month');
+        const endOfMonth = currentMoment.clone().endOf('month');
+        let totalMinutes = 0;
+
+        Object.entries(calendarShifts).forEach(([cellId, shiftData]) => {
+            if (cellId.startsWith(userId) && shiftData.date >= startOfMonth.format('YYYY-MM-DD') && shiftData.date <= endOfMonth.format('YYYY-MM-DD')) {
+                const shift = shifts.find(s => s.id === shiftData.shiftId);
+                if (shift) {
+                    const startTime = moment(shift.startTime, 'HH:mm');
+                    const endTime = moment(shift.endTime, 'HH:mm');
+
+                    if (endTime.isBefore(startTime)) {
+                        // Przypadek, gdy zmiana przechodzi przez północ
+                        totalMinutes += moment.duration(endTime.add(1, 'day').diff(startTime)).asMinutes();
+                    } else {
+                        totalMinutes += moment.duration(endTime.diff(startTime)).asMinutes();
+                    }
+                }
+            }
+        });
+
+        let hours = Math.floor(totalMinutes / 60);
+        let minutes = Math.floor(totalMinutes % 60);
+
+        return [hours, minutes];
+    };
+
+
+
+
     const renderWeekView = () => {
         const daysOfWeek = renderDaysOfWeek();
         const today = moment(); // Dzisiejsza data
@@ -323,75 +401,103 @@ const Calendar = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {teamUsers.map((employee, index) => (
-                        <tr key={employee.uid}>
-                            <td>
-                                <div className='d-flex align-items-center gap-2'>
-                                    <div>
-                                        {<AvatarMini userId={employee.uid} />}
+                    {teamUsers.map((employee, index) => {
+
+                        const [totalHours, totalMinutes] = calculateTotalShiftHours(employee.uid);
+                        const totalShiftMinutes = totalHours * 60 + totalMinutes;
+                        const employeeWorkingHoursLimit = parseFloat(workingHours[employee.uid] || 0);
+                        const employeeWorkingHoursLimitInMinutes = employeeWorkingHoursLimit * 60;
+                        const isOverHours = totalShiftMinutes > employeeWorkingHoursLimitInMinutes;
+
+                        return (
+                            <tr key={employee.uid}>
+                                <td>
+                                    <div className='d-flex align-items-center gap-2'>
+                                        <div>
+                                            {<AvatarMini userId={employee.uid} />}
+                                        </div>
+                                        <div style={{ fontWeight: "500" }}>
+                                            {employee.fullName}
+                                        </div>
+
                                     </div>
-                                    <div style={{ fontWeight: "500" }}>
-                                        {employee.fullName}
-                                    </div>
-                                </div>
-                            </td>
-                            {new Array(7).fill(null).map((_, dayIndex) => {
-                                const dayDate = currentMoment.clone().startOf('isoWeek').add(dayIndex, 'days').format('YYYY-MM-DD');
-                                const cellId = `${employee.uid}_${dayDate}`;
-                                const cellData = calendarShifts[cellId] || {};
-                                const shiftItem = shifts.find(s => s.id === cellData.shiftId);
-                                const oooItem = ooos.find(o => o.id === cellData.oooId);
-                                const isToday = currentMoment.clone().startOf('isoWeek').add(dayIndex, 'days').isSame(today, 'day');
-
-                                const removeItem = (type) => {
-                                    // Update state to remove item from this cell
-                                    console.log('removed')
-                                    setCalendarShifts(prev => ({
-                                        ...prev,
-                                        [cellId]: {
-                                            ...prev[cellId],
-                                            [type]: null,
-                                        }
-                                    }));
-                                };
-
-                                return (
-                                    <Droppable droppableId={cellId} key={cellId}>
-                                        {(provided, snapshot) => (
-                                            <td ref={provided.innerRef} {...provided.droppableProps} className={`${isToday ? 'today' : ''} ${snapshot.isDraggingOver ? 'highlight' : ''}`}>
-                                                {cellData.vacationId === vacationItem.id ? (<div className="vacation shift-item py-2 my-1 rounded-3" style={{ padding: "0 15px", opacity: isDatePast(dayDate) && !isEditMode ? 0.5 : 1 }}>
-                                                    {isEditMode && (<div className="remove-icon" onClick={() => removeItem('vacationId')}><CrossIcon /></div>)}
-                                                    <b>{vacationItem.name}</b>
-                                                    <div className="hours">All day</div>
-                                                </div>) : (
-                                                    <>
-
-                                                        {shiftItem && (
-                                                            <div className={`shift-item py-2 my-1 rounded-3`} style={{ padding: "0 15px", opacity: isDatePast(dayDate) && !isEditMode ? 0.5 : 1 }}>
-                                                                {isEditMode && (<div className="remove-icon" onClick={() => removeItem('shiftId')}><CrossIcon /></div>)}
-                                                                <b>{shiftItem.name}</b>
-                                                                <div className='hours'>{shiftItem.startTime} - {shiftItem.endTime}</div>
-                                                            </div>
-                                                        )}
-
-                                                        {oooItem && (
-                                                            <div className={`ooo shift-item py-2 my-1 rounded-3`} style={{ padding: "0 15px", opacity: isDatePast(dayDate) && !isEditMode ? 0.5 : 1 }}>
-                                                                {isEditMode && (<div className="remove-icon" onClick={() => removeItem('oooId')}><CrossIcon /></div>)}
-                                                                <b>{oooItem.name}</b>
-                                                                <div className='hours'>{oooItem.startTime} - {oooItem.endTime}</div>
-                                                            </div>
-                                                        )}
-
-                                                    </>
-                                                )}
-                                                {provided.placeholder}
-                                            </td>
+                                    <div className="user-info">
+                                        {isEditMode && (
+                                            <Form.Group className="my-2">
+                                                <Form.Label>Set working hours</Form.Label>
+                                                <Form.Control
+                                                    type="number"
+                                                    min="0"
+                                                    value={isLoading ? 'Loading' : (workingHours[employee.uid] || '')}
+                                                    onChange={(e) => handleWorkingHoursChange(employee.uid, e.target.value)}
+                                                    placeholder={isLoading ? 'Loading...' : 'Working hours'}
+                                                />
+                                            </Form.Group>
                                         )}
-                                    </Droppable>
-                                );
-                            })}
-                        </tr>
-                    ))}
+                                        {currentMoment.format('MMMM YYYY')}
+                                        <div style={{ color: !isLoading && isEditMode && isOverHours ? 'red' : 'inherit' }}>
+                                            {`${totalHours}h:${totalMinutes}m`}
+                                        </div>
+                                    </div>
+                                </td>
+                                {new Array(7).fill(null).map((_, dayIndex) => {
+                                    const dayDate = currentMoment.clone().startOf('isoWeek').add(dayIndex, 'days').format('YYYY-MM-DD');
+                                    const cellId = `${employee.uid}_${dayDate}`;
+                                    const cellData = calendarShifts[cellId] || {};
+                                    const shiftItem = shifts.find(s => s.id === cellData.shiftId);
+                                    const oooItem = ooos.find(o => o.id === cellData.oooId);
+                                    const isToday = currentMoment.clone().startOf('isoWeek').add(dayIndex, 'days').isSame(today, 'day');
+
+                                    const removeItem = (type) => {
+                                        // Update state to remove item from this cell
+                                        console.log('removed')
+                                        setCalendarShifts(prev => ({
+                                            ...prev,
+                                            [cellId]: {
+                                                ...prev[cellId],
+                                                [type]: null,
+                                            }
+                                        }));
+                                    };
+
+                                    return (
+                                        <Droppable droppableId={cellId} key={cellId}>
+                                            {(provided, snapshot) => (
+                                                <td ref={provided.innerRef} {...provided.droppableProps} className={`${isToday ? 'today' : ''} ${snapshot.isDraggingOver ? 'highlight' : ''}`}>
+                                                    {cellData.vacationId === vacationItem.id ? (<div className="vacation shift-item py-2 my-1 rounded-3" style={{ padding: "0 15px", opacity: isDatePast(dayDate) && !isEditMode ? 0.5 : 1 }}>
+                                                        {isEditMode && (<div className="remove-icon" onClick={() => removeItem('vacationId')}><CrossIcon /></div>)}
+                                                        <b>{vacationItem.name}</b>
+                                                        <div className="hours">All day</div>
+                                                    </div>) : (
+                                                        <>
+
+                                                            {shiftItem && (
+                                                                <div className={`shift-item py-2 my-1 rounded-3`} style={{ padding: "0 15px", opacity: isDatePast(dayDate) && !isEditMode ? 0.5 : 1 }}>
+                                                                    {isEditMode && (<div className="remove-icon" onClick={() => removeItem('shiftId')}><CrossIcon /></div>)}
+                                                                    <b>{shiftItem.name}</b>
+                                                                    <div className='hours'>{shiftItem.startTime} - {shiftItem.endTime}</div>
+                                                                </div>
+                                                            )}
+
+                                                            {oooItem && (
+                                                                <div className={`ooo shift-item py-2 my-1 rounded-3`} style={{ padding: "0 15px", opacity: isDatePast(dayDate) && !isEditMode ? 0.5 : 1 }}>
+                                                                    {isEditMode && (<div className="remove-icon" onClick={() => removeItem('oooId')}><CrossIcon /></div>)}
+                                                                    <b>{oooItem.name}</b>
+                                                                    <div className='hours'>{oooItem.startTime} - {oooItem.endTime}</div>
+                                                                </div>
+                                                            )}
+
+                                                        </>
+                                                    )}
+                                                    {provided.placeholder}
+                                                </td>
+                                            )}
+                                        </Droppable>
+                                    );
+                                })}
+                            </tr>
+                        )
+                    })}
                 </tbody>
             </table>
 
@@ -437,6 +543,10 @@ const Calendar = () => {
                 }
             });
         }
+
+        console.log(ooos)
+        console.log(shifts)
+        console.log(vacationItem)
     };
 
     const renderMonthView = () => {
@@ -526,20 +636,9 @@ const Calendar = () => {
         }
     };
 
-    const isDropAllowed = (draggableId, droppableId) => {
-        // Zakładając, że draggableId zawiera informacje o typie (np. 'shift', 'ooo', 'vacation')
-        const itemType = draggableId.split('-')[0]; // Przykład, jak otrzymać typ
-
-        // Określ zasady, które określają dopuszczalność dropu
-        if (droppableId === 'vacations' && itemType !== 'vacation') {
-            return false;
-        }
-        // Dodaj więcej zasad tutaj w razie potrzeby
-        return true;
-    };
-
     const availableShifts = shifts.filter(shift => shift.isActive);
     const availableOOOs = ooos.filter(ooo => ooo.isActive);
+
 
     return (
         <DragDropContext onDragEnd={handleOnDragEnd}>
@@ -618,7 +717,7 @@ const Calendar = () => {
                                     Shifts
                                 </span>
                             </div>
-                            <Droppable droppableId="shifts" direction='horizontal' isDropDisabled={(draggableId) => !isDropAllowed(draggableId, 'shifts')}>
+                            <Droppable droppableId="shifts" direction='horizontal' isDropDisabled={true}>
                                 {(provided) => (
                                     <div
                                         {...provided.droppableProps}
@@ -653,7 +752,7 @@ const Calendar = () => {
                                     Out Of Office
                                 </span>
                             </div>
-                            <Droppable droppableId='ooo' direction='horizontal' isDropDisabled={(draggableId) => !isDropAllowed(draggableId, 'ooo')}>
+                            <Droppable droppableId='ooo' direction='horizontal' isDropDisabled={true}>
                                 {(provided) => (
                                     <div {...provided.droppableProps} ref={provided.innerRef} className='d-flex'>
                                         {availableOOOs.map((ooo, index) => (
@@ -683,7 +782,7 @@ const Calendar = () => {
                                     Vacations
                                 </span>
                             </div>
-                            <Droppable droppableId='vacations' direction='horizontal' isDropDisabled={(draggableId) => !isDropAllowed(draggableId, 'vacations')}>
+                            <Droppable droppableId='vacations' direction='horizontal' isDropDisabled={true}>
                                 {(provided) => (
                                     <div {...provided.droppableProps} ref={provided.innerRef} className='d-flex'>
                                         <Draggable draggableId={vacationItem.id} index={1}>

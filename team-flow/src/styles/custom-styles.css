@@ -561,7 +561,7 @@ tr .today {
 
 .remove-icon {
     cursor: pointer;
-    color: white important!;
+    color: white !important;
 }
 
 .tooltip-left-align .tooltip-inner {
@@ -570,4 +570,9 @@ tr .today {
 
 .tooltip-inner .avatar-mini{
   outline-color: #000;
+}
+
+.user-info{
+  color: #828282;
+  font-size: 0.9rem;
 }
