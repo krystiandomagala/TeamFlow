@@ -17,8 +17,6 @@ const Calendar = () => {
     const [currentMoment, setCurrentMoment] = useState(moment());
     const [view, setView] = useState('week'); // 'week' lub 'month'
     const [teamUsers, setTeamUsers] = useState([]); // Przechowuj dane użytkowników z zespołu
-    const { getTeamData } = useUserTeamData();
-    const { teamId } = useTeamExists();
     const [shifts, setShifts] = useState([]);
     const [newShift, setNewShift] = useState({ name: '', startTime: '', endTime: '' });
     const [error, setError] = useState('');
@@ -31,6 +29,18 @@ const Calendar = () => {
     const [tasks, setTasks] = useState([]);
     const [workingHours, setWorkingHours] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const { getTeamData, isUserTeamAdmin } = useUserTeamData();
+    const { teamId } = useTeamExists();
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        async function fetchData() {
+            const adminStatus = await isUserTeamAdmin(teamId);
+            setIsAdmin(adminStatus);
+        }
+
+        fetchData();
+    }, [teamId, getTeamData, isUserTeamAdmin]);
 
     useEffect(() => {
         const fetchWorkingHours = async () => {
@@ -142,6 +152,10 @@ const Calendar = () => {
     const tdRef = useRef(null); // Ref dla komórki tabeli
 
     const toggleEditMode = () => {
+        if (!isAdmin) {
+            setIsEditMode(false)
+            return;
+        }
         if (isEditMode) finishEditing()
         setIsEditMode(!isEditMode);
     };
@@ -501,9 +515,13 @@ const Calendar = () => {
                 </tbody>
             </table>
 
-            <Button variant="secondary" onClick={toggleEditMode} className='my-3'>
-                {isEditMode ? "Finish Editing" : "Edit Schedule"}
-            </Button>
+            {
+                isAdmin &&
+                (<Button variant="secondary" onClick={toggleEditMode} className='my-3'>
+                    {isEditMode ? "Finish Editing" : "Edit Schedule"}
+                </Button>)
+            }
+
         </>
         );
     };
@@ -589,21 +607,59 @@ const Calendar = () => {
                 <tbody>
                     {Array.from({ length: 5 }).map((_, weekIndex) => (
                         <tr key={weekIndex} >
-                            {days.slice(weekIndex * 7, (weekIndex + 1) * 7).map(day => (
-                                <td
-                                    key={day.format('YYYY-MM-DD')}
-                                    className={
-                                        day.isSame(today, 'day') ? 'today' :
-                                            !day.isSame(currentMoment, 'month') ? 'text-muted' : ''
-                                    }>
-                                    {day.format('D')}
-                                    <div className="tasks-for-day" style={{ opacity: isDatePast(day) ? 0.5 : 1 }}>
-                                        {dayHasTasks(day).map(task => (
-                                            <CalendarTask task={task} key={task.id} />
-                                        ))}
-                                    </div>
-                                </td>
-                            ))}
+                            {days.slice(weekIndex * 7, (weekIndex + 1) * 7).map(day => {
+                                const dayShifts = Object.entries(calendarShifts)
+                                    .filter(([key, value]) => key.endsWith(day.format('YYYY-MM-DD')))
+                                    .map(([key, value]) => ({ userId: key.split('_')[0], shiftItem: value, oooItem: value, vacationItem: value })); // Assuming the userID is part of the key
+
+
+                                console.log(dayShifts)
+                                return (
+                                    <td
+                                        key={day.format('YYYY-MM-DD')}
+                                        className={
+                                            day.isSame(today, 'day') ? 'today' :
+                                                !day.isSame(currentMoment, 'month') ? 'text-muted' : ''
+                                        }>
+                                        {day.format('D')}
+                                        <div className="tasks-for-day d-flex flex-column gap-2" style={{ opacity: isDatePast(day) ? 0.5 : 1 }}>
+                                            {dayHasTasks(day).map(task => (
+                                                <CalendarTask task={task} key={task.id} />
+                                            ))}
+                                            {dayShifts.map(({ userId, shiftItem }, index) => {
+                                                // Find the corresponding shift in the shifts array
+                                                const shift = shifts.find(s => s.id === shiftItem.shiftId);
+                                                return shift ? (
+                                                    <div key={index} className="shift-item p-1 rounded-2 d-flex align-items-center gap-2">
+                                                        <AvatarMini userId={userId} />
+                                                        <div className='hours'>{shift.startTime} - {shift.endTime}</div>
+                                                    </div>
+                                                ) : null; // If no matching shift is found, don't render anything
+                                            })}
+                                            {dayShifts.map(({ oooItem, userId }, index) => {
+                                                // Find the corresponding shift in the shifts array
+                                                const ooo = ooos.find(s => s.id === oooItem.oooId);
+                                                return ooo ? (
+                                                    <div key={index} className="shift-item ooo p-1 rounded-2 d-flex align-items-center gap-2">
+                                                        <AvatarMini userId={userId} />
+                                                        <div className='hours text-center'>{ooo.startTime} - {ooo.endTime}</div>
+                                                    </div>
+                                                ) : null; // If no matching shift is found, don't render anything
+                                            })}
+                                            {dayShifts.map(({ vacationItem, userId }, index) => {
+                                                // Find the corresponding shift in the shifts array
+                                                const vacation = vacationItem.vacationId
+                                                return vacation ? (
+                                                    <div key={index} className="shift-item vacation p-1 rounded-2 d-flex align-items-center gap-2">
+                                                        <AvatarMini userId={userId} />
+                                                        <div className='hours text-center'>All day</div>
+                                                    </div>
+                                                ) : null; // If no matching shift is found, don't render anything
+                                            })}
+                                        </div>
+                                    </td>
+                                )
+                            })}
                         </tr>
                     ))}
                 </tbody>
@@ -642,7 +698,7 @@ const Calendar = () => {
 
     return (
         <DragDropContext onDragEnd={handleOnDragEnd}>
-            <div className='mt-2 flex-grow-1 d-flex flex-column overflow-auto'>
+            <div className='mt-2 flex-grow-1 d-flex flex-column overflow-auto pe-3'>
                 {renderCalendarHeader()}
                 {view === 'week' ? renderWeekView() : renderMonthView()}
                 {isEditMode && (

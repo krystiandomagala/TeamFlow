@@ -15,7 +15,7 @@ export default function Schedule() {
 
   return (
     <MainLayout>
-      <div className='my-3 pe-3 w-100 d-flex flex-column'>
+      <div className='my-3 w-100 d-flex flex-column'>
         <h1>Schedule</h1>
         <MyCalendar />
       </div>

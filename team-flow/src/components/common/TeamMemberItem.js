@@ -8,15 +8,36 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useAuth } from '../../contexts/AuthContext';
 
 
-function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam }) {
+function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam, onGrantAdmin, onRevokeAdmin }) {
     // Przykładowe wyświetlanie danych członka zespołu
     const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
     const { teamId } = useTeamExists();
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const { currentUser } = useAuth()
     const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false);
+    const [showGrantAdminConfirmModal, setShowGrantAdminConfirmModal] = useState(false);
+    const [showRevokeAdminConfirmModal, setShowRevokeAdminConfirmModal] = useState(false);
 
     const navigate = useNavigate();
+
+
+    const handleRevokeAdminClick = () => {
+        setShowRevokeAdminConfirmModal(true);
+    };
+
+    const handleConfirmRevokeAdmin = () => {
+        onRevokeAdmin(member.uid);
+        setShowRevokeAdminConfirmModal(false);
+    };
+
+    const handleGrantAdminClick = () => {
+        setShowGrantAdminConfirmModal(true);
+    };
+
+    const handleConfirmGrantAdmin = () => {
+        onGrantAdmin(member.uid);
+        setShowGrantAdminConfirmModal(false);
+    };
 
     const handleConfirmLeave = () => {
         // Logic to leave the team
@@ -59,7 +80,6 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam }) {
                         <span className='fw-bolder h5 m-0'>{member.fullName}</span>
                     </div>
                 </div>
-                <div className='mt-3'><b>Working hours </b></div>160h
             </div>
             {isCurrentUserAdmin && currentUser.uid !== member.uid && (
                 <Dropdown>
@@ -67,8 +87,15 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam }) {
                         <DotsIcon />
                     </Dropdown.Toggle>
                     <Dropdown.Menu >
-                        <Dropdown.Item>Edit</Dropdown.Item>
+                        {
+                            isAdmin ? (
+                                <Dropdown.Item onClick={handleRevokeAdminClick}>Revoke Admin</Dropdown.Item>
+                            ) : (
+                                <Dropdown.Item onClick={handleGrantAdminClick}>Grant Admin</Dropdown.Item>
+                            )
+                        }
                         <Dropdown.Item onClick={handleRemoveClick}>Remove</Dropdown.Item>
+
                     </Dropdown.Menu>
                 </Dropdown>
             )}
@@ -84,7 +111,7 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam }) {
                 </Dropdown>
             )}
 
-            <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)}>
+            <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Remove User</Modal.Title>
                 </Modal.Header>
@@ -98,7 +125,7 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam }) {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <Modal show={showLeaveConfirmModal} onHide={() => setShowLeaveConfirmModal(false)}>
+            <Modal show={showLeaveConfirmModal} onHide={() => setShowLeaveConfirmModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Leave Team</Modal.Title>
                 </Modal.Header>
@@ -109,6 +136,34 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam }) {
                     </Button>
                     <Button variant="danger" onClick={handleConfirmLeave}>
                         Leave Team
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={showGrantAdminConfirmModal} onHide={() => setShowGrantAdminConfirmModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Grant Admin Permissions</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Are you sure you want to grant admin permissions to this user?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowGrantAdminConfirmModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleConfirmGrantAdmin}>
+                        Grant Admin
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={showRevokeAdminConfirmModal} onHide={() => setShowRevokeAdminConfirmModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Revoke Admin Permissions</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Are you sure you want to revoke admin permissions from this user?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowRevokeAdminConfirmModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={handleConfirmRevokeAdmin}>
+                        Revoke Admin
                     </Button>
                 </Modal.Footer>
             </Modal>

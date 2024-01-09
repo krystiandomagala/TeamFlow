@@ -576,3 +576,23 @@ tr .today {
   color: #828282;
   font-size: 0.9rem;
 }
+
+.shift-item .avatar-mini{
+  outline-color:#1271fb;
+}
+
+.task-item-calendar{
+  box-shadow: none;
+  background-color: #ababab;
+  color:rgba(255, 255, 255, 0.8);
+}
+
+.shift-item .avatar-mini {
+  outline-color: transparent; 
+}
+
+.submenu-item{
+  font-size: 0.9rem;
+  padding-bottom: 5px;
+}
+

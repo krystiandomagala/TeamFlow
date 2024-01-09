@@ -3,7 +3,7 @@ import MainLayout from '../../layouts/MainLayout';
 import Loading from '../common/Loading';
 import useTeamExists from '../../hooks/useTeamExists';
 import { useUserTeamData } from '../../contexts/TeamContext';
-import { Button, Modal, useAccordionButton } from 'react-bootstrap';
+import { Button, Modal, useAccordionButton, Form } from 'react-bootstrap';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { v4 as uuid } from 'uuid';
@@ -25,8 +25,54 @@ export default function Team() {
   const [teamMembers, setTeamMembers] = useState([]);
   const [teamData, setTeamData] = useState(null);
   const { currentUser } = useAuth()
+  const [searchQuery, setSearchQuery] = useState('');
 
   const navigate = useNavigate()
+
+  const grantAdminPermissions = async (userId) => {
+    if (!teamData.adminIds.includes(userId)) {
+      const updatedAdminIds = [...teamData.adminIds, userId];
+
+      try {
+        await updateDoc(doc(db, 'teams', teamId), {
+          adminIds: updatedAdminIds
+        });
+        // Update local state
+        setTeamData({ ...teamData, adminIds: updatedAdminIds });
+        // Optionally, show success message
+      } catch (error) {
+        console.error('Error granting admin permissions:', error);
+        // Optionally, handle error (e.g., show an error message)
+      }
+    }
+  };
+
+  const revokeAdminPermissions = async (userId) => {
+    if (teamData.adminIds.includes(userId)) {
+      const updatedAdminIds = teamData.adminIds.filter(id => id !== userId);
+
+      try {
+        await updateDoc(doc(db, 'teams', teamId), {
+          adminIds: updatedAdminIds
+        });
+        // Update local state
+        setTeamData({ ...teamData, adminIds: updatedAdminIds });
+        // Optionally, show success message
+      } catch (error) {
+        console.error('Error revoking admin permissions:', error);
+        // Optionally, handle error (e.g., show an error message)
+      }
+    }
+  };
+
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const filteredTeamMembers = teamMembers.filter(member =>
+    member.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const removeTeamMember = async (userId) => {
     // Logic to remove the user from the team
@@ -129,10 +175,17 @@ export default function Team() {
 
   return (
     <MainLayout>
-      <div className='my-3 pe-3 d-flex flex-column w-100' style={{ overflowY: 'auto' }}>
+      <div className='my-3 pe-3 d-flex flex-column w-100'>
         <h1>Team</h1>
         {isAdmin && (
           <>
+            <Form.Control
+              type="text"
+              placeholder="Search by name..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="form-control mb-3"
+            />
             <Button onClick={handleOpenModal}>Add team member</Button>
             <Modal show={showModal} onHide={handleCloseModal} centered>
               <Modal.Header closeButton>
@@ -157,11 +210,14 @@ export default function Team() {
             </Modal>
           </>
         )}
-        <div>
-          {isAdmin ? "Jesteś adminem!" : "Nie jesteś adminem :("}
+
+        <div className="divider mb-3 mt-4">
+          <span>
+            Team members
+          </span>
         </div>
-        {teamMembers.map(member => (
-          <TeamMemberItem key={member.id} member={member} isAdmin={isUserAdmin(member.uid)} onRemove={removeTeamMember} onLeaveTeam={leaveTeam} />
+        {filteredTeamMembers.map(member => (
+          <TeamMemberItem key={member.uid} member={member} isAdmin={isUserAdmin(member.uid)} onRemove={removeTeamMember} onLeaveTeam={leaveTeam} onGrantAdmin={grantAdminPermissions} onRevokeAdmin={revokeAdminPermissions} />
         ))}
       </div>
 

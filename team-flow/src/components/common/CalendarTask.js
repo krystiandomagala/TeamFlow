@@ -77,11 +77,18 @@ export default function CalendarTask({ task }) {
 
     // Tooltip z dodatkowymi informacjami o zadaniu
     const renderTooltip = (props) => (
-        <Tooltip id="task-tooltip" {...props} className="tooltip-left-align" >
+        <Tooltip id="task-tooltip" {...props} className="tooltip-left-align">
+            <div className='tooltip-inner d-flex gap-2 mt-2' style={{ width: '250px' }}>
+                <div className='d-inline-flex align-items-center gap-1 task-priority'>
+                    <ExclamationIcon className={`exclamation-icon ${priorityClass}`} />
+                </div>
+                <div className='d-flex align-items-center gap-1 task-progress'>
+                    <span className={`progress-icon ${stateClass}`}></span>
+                </div>
+            </div>
             <div className='tooltip-inner'><strong className='h6'>Title</strong> <div>{task.title}</div></div>
             <div className='tooltip-inner'><strong className='h6'>Deadline</strong> <div>{formatDate(task.deadline)}</div></div>
-            <div className='tooltip-inner'><strong className='h6'>Status</strong> <div>{taskStatus}</div></div>
-            <div className='tooltip-inner'><strong className='h6'>Description</strong><div> {task.description}</div></div>
+            <div className='tooltip-inner'><strong className='h6'>Description</strong><div>{task.description}</div></div>
             <div className='tooltip-inner mt-1'>
                 <div className='progress' style={{ maxWidth: "350px" }}>
                     <div className="progress-bar bg-primary" style={{ width: `${completedPercentage}%` }}></div>
@@ -105,15 +112,7 @@ export default function CalendarTask({ task }) {
             placement="top"
             overlay={renderTooltip}
         >
-            <div className='task-item p-2 rounded-3 mt-2'>
-                <div className='d-flex gap-1 mb-1'>
-                    <span className='d-inline-flex align-items-center gap-1 task-priority'>
-                        <ExclamationIcon className={`exclamation-icon ${priorityClass}`} />
-                    </span>
-                    <div className='d-flex align-items-center gap-1 task-progress'>
-                        <span className={`progress-icon ${stateClass}`}></span>
-                    </div>
-                </div>
+            <div className='task-item-calendar rounded-2' style={{ padding: '0.3rem 0.5rem' }}>
                 <span>{task.title}</span>
             </div>
         </OverlayTrigger>
