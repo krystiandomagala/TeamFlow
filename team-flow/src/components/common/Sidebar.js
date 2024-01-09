@@ -7,14 +7,13 @@ import { ReactComponent as StatisticsIcon } from '../../assets/stats.svg';
 import { ReactComponent as TeamIcon } from '../../assets/team.svg';
 import { ReactComponent as TasksIcon } from '../../assets/tasks.svg';
 import { ReactComponent as ChatIcon } from '../../assets/chat.svg';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useUserTeamData } from '../../contexts/TeamContext';
 import { ChevronLeft, ChevronRight } from 'react-bootstrap-icons';
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(window.innerWidth < 1200);
   const { lastTeamId } = useUserTeamData(); // Używamy hooka useUserTeamData
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,7 +64,7 @@ export default function Sidebar() {
             subMenuContent: () => {
               return {
                 padding: '10px 30px 5px 30px',
-                backgroundColor: 'transparent'
+                backgroundColor: '#FBFBFB'
               }
             },
             SubMenuExpandIcon: ({ open }) => {

@@ -8,14 +8,13 @@ export default function Schedule() {
   const { isLoading } = useTeamExists();
 
 
-
   if (isLoading) {
     return <MainLayout><Loading /></MainLayout>;
   }
 
   return (
     <MainLayout>
-      <div className='my-3 w-100 d-flex flex-column'>
+      <div className='my-3 d-flex flex-column table-scroll-width'>
         <h1>Schedule</h1>
         <MyCalendar />
       </div>
