@@ -106,13 +106,13 @@ export default function MobileMenu() {
                 Team<span style={{ fontWeight: "900" }}>Flow</span>
               </MenuItem>
               <MenuItem active={window.location.pathname === `/${lastTeamId}/dashboard`} icon={<DashboardIcon />} component={<Link to={`/${lastTeamId}/dashboard`} />}>Dashboard</MenuItem>
-              <SubMenu label="Calendar" icon={<ScheduleIcon />} active={window.location.pathname === `/${lastTeamId}/schedule`}>
+              <SubMenu label="Calendar" icon={<ScheduleIcon />} active={window.location.pathname === `/${lastTeamId}/schedule` || window.location.pathname === `/${lastTeamId}/schedule/time-off-requests`}>
                 <MenuItem active={window.location.pathname === `/${lastTeamId}/schedule`} component={<Link to={`/${lastTeamId}/schedule`} />} className='submenu-item'>
                   Schedule
                 </MenuItem>
                 <MenuItem
-                  active={window.location.pathname === `/${lastTeamId}/schedule/time-off`}
-                  component={<Link to={`/${lastTeamId}/schedule/time-off`} />}
+                  active={window.location.pathname === `/${lastTeamId}/schedule/time-off-requests`}
+                  component={<Link to={`/${lastTeamId}/schedule/time-off-requests`} />}
                   className='submenu-item'
                 >
                   Time off Requests

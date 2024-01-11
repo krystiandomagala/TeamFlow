@@ -19,7 +19,7 @@ import NotFound from '../views/NotFound';
 import Settings from '../views/Settings';
 import { UserProvider } from '../../contexts/UserContext';
 import { ChatProvider } from '../../contexts/ChatContext';
-
+import TimeOff from '../views/TimeOff';
 function App() {
   return (
     <Router>
@@ -30,6 +30,7 @@ function App() {
               <Routes>
                 <Route exact path='/:teamId/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 <Route path='/:teamId/schedule' element={<PrivateRoute><Schedule /></PrivateRoute>} />
+                <Route path='/:teamId/schedule/time-off-requests' element={<PrivateRoute><TimeOff /></PrivateRoute>} />
                 <Route path='/:teamId/statistics' element={<PrivateRoute><Statistics /></PrivateRoute>} />
                 <Route path='/:teamId/team' element={<PrivateRoute><Team /></PrivateRoute>} />
                 <Route path='/:teamId/tasks' element={<PrivateRoute><Tasks /></PrivateRoute>} />

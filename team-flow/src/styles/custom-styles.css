@@ -358,7 +358,8 @@ h2 {
 
 .task-item,
 .team-member-item,
-.shift-item {
+.shift-item, 
+.request-item {
   background-color: #fbfbfb;
   transition: background-color 0.15s ease-in-out;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
@@ -595,3 +596,10 @@ tr .today {
   padding-bottom: 5px;
 }
 
+.request-btn{
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
