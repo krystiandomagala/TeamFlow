@@ -71,7 +71,7 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam, onGrantAdmin, 
     const { isUserTeamAdmin } = useUserTeamData();
 
     return (
-        <div className='team-member-item p-3 rounded-4 my-2 d-flex align-items-top justify-content-between gap-3'>
+        <div className='team-member-item p-3 rounded-4 my-2 d-flex align-items-top justify-content-between gap-3 overflow-visible'>
             <div>
                 <div className='d-flex align-items-center gap-3'>
                     <AvatarMid userId={member.uid} />
@@ -82,7 +82,7 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam, onGrantAdmin, 
                 </div>
             </div>
             {isCurrentUserAdmin && currentUser.uid !== member.uid && (
-                <Dropdown>
+                <Dropdown >
                     <Dropdown.Toggle style={{ backgroundColor: 'transparent', border: 'none', color: 'black' }} bsPrefix='p-0'>
                         <DotsIcon />
                     </Dropdown.Toggle>

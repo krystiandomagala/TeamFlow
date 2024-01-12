@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useUserTeamData } from '../../contexts/TeamContext';
 import useTeamExists from '../../hooks/useTeamExists';
 import AvatarMini from './AvatarMini'
-import { collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { ChevronLeft, ChevronRight } from 'react-bootstrap-icons';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -12,6 +12,7 @@ import { Button, Form, Alert, Modal, Dropdown } from 'react-bootstrap';
 import { ReactComponent as CrossIcon } from '../../assets/x.svg'
 import { ReactComponent as DotsIcon } from '../../assets/ellipsis-vertical.svg'
 import CalendarTask from './CalendarTask';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Calendar = () => {
     const [currentMoment, setCurrentMoment] = useState(moment());
@@ -32,6 +33,7 @@ const Calendar = () => {
     const { getTeamData, isUserTeamAdmin } = useUserTeamData();
     const { teamId } = useTeamExists();
     const [isAdmin, setIsAdmin] = useState(false);
+    const { currentUser } = useAuth()
 
     useEffect(() => {
         async function fetchData() {
@@ -99,7 +101,23 @@ const Calendar = () => {
         });
     }, [teamId, teamUsers]);
 
-
+    const sendNewSchedule = async () => {
+        teamUsers.forEach(async (user) => {
+            if (user.uid !== currentUser.uid) {
+                try {
+                    const notificationRef = collection(db, 'teams', teamId, 'teamMembers', user.uid, 'notifications');
+                    await addDoc(notificationRef, {
+                        type: 'schedule',
+                        createdBy: currentUser.uid,
+                        createdAt: serverTimestamp(),
+                        isRead: false
+                    });
+                } catch (error) {
+                    console.error('Error sending notification:', error);
+                }
+            }
+        });
+    }
 
     const finishEditing = async () => {
         Object.entries(calendarShifts).forEach(([cellId, shiftData]) => {
@@ -122,6 +140,8 @@ const Calendar = () => {
                 console.error('Błąd podczas zapisywania godzin pracy:', error);
             }
         }
+
+        sendNewSchedule()
     };
 
 
@@ -517,9 +537,12 @@ const Calendar = () => {
 
             {
                 isAdmin &&
-                (<Button variant="secondary" onClick={toggleEditMode} className='my-3'>
-                    {isEditMode ? "Finish Editing" : "Edit Schedule"}
-                </Button>)
+                (
+                    <Button variant="secondary" onClick={toggleEditMode} className='my-2'>
+                        {isEditMode ? "Finish Editing" : "Edit Schedule"}
+                    </Button>
+                )
+
             }
 
         </>

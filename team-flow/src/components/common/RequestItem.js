@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import AvatarMini from './AvatarMini';
 import { useUser } from '../../contexts/UserContext'; // Zaktualizuj ścieżkę
 import moment from 'moment';
 import { ReactComponent as CalendarIcon } from '../../assets/calendar-filled.svg'
 import { Alert, Button, Dropdown } from 'react-bootstrap';
-import { doc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import useTeamExists from '../../hooks/useTeamExists';
 import { ReactComponent as DotsIcon } from '../../assets/ellipsis-vertical.svg'
@@ -49,7 +49,6 @@ export default function RequestItem({ request, isAdmin }) {
         }
 
     }
-    console.log(request)
 
     const handleAccept = async () => {
         setEditMode(false)
@@ -58,6 +57,8 @@ export default function RequestItem({ request, isAdmin }) {
             await updateDoc(requestRef, {
                 status: "accepted"
             });
+
+            sendStatusUpdateNotification(request.id, request.user, 'accepted')
         } catch (error) {
             console.error("Error updating request: ", error);
         }
@@ -70,8 +71,25 @@ export default function RequestItem({ request, isAdmin }) {
             await updateDoc(requestRef, {
                 status: "declined"
             });
+            sendStatusUpdateNotification(request.id, request.user, 'declined')
         } catch (error) {
             console.error("Error updating request: ", error);
+        }
+    };
+
+    const sendStatusUpdateNotification = async (requestId, userId, status) => {
+        try {
+            const notificationRef = collection(db, "teams", teamId, "teamMembers", userId, "notifications");
+            await addDoc(notificationRef, {
+                requestId,
+                createdBy: currentUser.uid,
+                status: status,
+                createdAt: serverTimestamp(),
+                isRead: false,
+                type: 'time-off-status-update'
+            });
+        } catch (error) {
+            console.error("Error sending notification: ", error);
         }
     };
 

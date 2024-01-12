@@ -3,7 +3,7 @@ import useTeamExists from '../../hooks/useTeamExists';
 import MainLayout from '../../layouts/MainLayout'
 import Loading from '../common/Loading';
 import { Button, Modal, Form, Alert } from 'react-bootstrap';
-import { addDoc, collection, serverTimestamp, query, getDocs, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, query, getDocs, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase'; // Zaktualizuj tę ścieżkę
 import DateRangePicker from 'react-bootstrap-daterangepicker';
 import 'bootstrap-daterangepicker/daterangepicker.css';
@@ -109,26 +109,45 @@ export default function TimeOff() {
             endDate: picker.endDate
         });
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Sprawdź, czy daty zostały wybrane
         if (!dateRange.startDate || !dateRange.endDate) {
             console.error("Please select a date range.");
             return;
         }
 
         try {
-            await addDoc(collection(db, "teams", teamId, "time-offs"), {
-                user: currentUser.uid, // Zastąp 'userId' odpowiednim identyfikatorem użytkownika
-                startDate: dateRange.startDate.toDate(), // Konwertuj Moment na Date
-                endDate: dateRange.endDate.toDate(), // Konwertuj Moment na Date
+            // Dodaj wniosek o urlop
+            const docRef = await addDoc(collection(db, "teams", teamId, "time-offs"), {
+                user: currentUser.uid,
+                startDate: dateRange.startDate.toDate(),
+                endDate: dateRange.endDate.toDate(),
                 note: note,
                 status: "requested",
                 createdAt: serverTimestamp()
             });
 
+            // Pobierz adminIds z dokumentu zespołu
+            const teamDoc = await getDoc(doc(db, "teams", teamId));
+            const adminIds = teamDoc.data()?.adminIds || [];
+            // Pobierz członków zespołu
+            const teamMembersSnapshot = await getDocs(collection(db, "teams", teamId, "teamMembers"));
+            console.log(teamMembersSnapshot)
+
+            // Filtruj i wyślij powiadomienia tylko do administratorów
+            teamMembersSnapshot.docs.forEach(async (memberDoc) => {
+                if (adminIds.includes(memberDoc.id) && memberDoc.id !== currentUser.uid) { // Sprawdź, czy ID użytkownika jest wśród adminIds i nie jest równy currentUser.uid
+                    await addDoc(collection(db, "teams", teamId, "teamMembers", memberDoc.id, "notifications"), {
+                        timeOffRequestId: docRef.id,
+                        createdBy: currentUser.uid,
+                        status: "requested",
+                        createdAt: serverTimestamp(),
+                        isRead: false,
+                        type: 'time-off-request'
+                    });
+                }
+            });
             setShowAlert(true);
             setTimeout(() => {
                 setShowAlert(false);
@@ -138,6 +157,8 @@ export default function TimeOff() {
             console.error("Error adding document: ", error);
         }
     };
+
+
 
     if (isLoading) {
         return <MainLayout><Loading /></MainLayout>;

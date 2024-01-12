@@ -37,7 +37,9 @@ export const UserTeamDataProvider = ({ children }) => {
       setLastTeamId(docRef.id); // Ustawienie ostatniego ID zespołu po stworzeniu nowego zespołu
 
       await setDoc(doc(db, "userChats", currentUser.uid, "teamChats", docRef.id), {})
-      await setDoc(doc(db, 'teams', docRef.id, 'teamMembers', currentUser.uid), {});
+      await setDoc(doc(db, 'teams', docRef.id, 'teamMembers', currentUser.uid), {
+        id: currentUser.uid
+      });
 
     } catch (error) {
       console.error('Error adding document: ', error); // Obsługa błędów
@@ -64,7 +66,9 @@ export const UserTeamDataProvider = ({ children }) => {
       });
 
       await setDoc(doc(db, "userChats", currentUser.uid, "teamChats", teamDoc.id), {})
-      await setDoc(doc(db, 'teams', teamDoc.id, 'teamMembers', currentUser.uid), {});
+      await setDoc(doc(db, 'teams', teamDoc.id, 'teamMembers', currentUser.uid), {
+        id: currentUser.uid
+      });
 
       setLastTeamId(teamDoc.id); // Ustawienie ostatniego ID zespołu po dołączeniu
       navigate(`/${teamDoc.id}/dashboard`); // Przeniesienie użytkownika do strony zespołu
