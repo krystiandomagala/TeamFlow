@@ -78,18 +78,22 @@ export default function RequestItem({ request, isAdmin }) {
     };
 
     const sendStatusUpdateNotification = async (requestId, userId, status) => {
-        try {
-            const notificationRef = collection(db, "teams", teamId, "teamMembers", userId, "notifications");
-            await addDoc(notificationRef, {
-                requestId,
-                createdBy: currentUser.uid,
-                status: status,
-                createdAt: serverTimestamp(),
-                isRead: false,
-                type: 'time-off-status-update'
-            });
-        } catch (error) {
-            console.error("Error sending notification: ", error);
+
+        if (currentUser.uid !== userId) {
+
+            try {
+                const notificationRef = collection(db, "teams", teamId, "teamMembers", userId, "notifications");
+                await addDoc(notificationRef, {
+                    requestId,
+                    createdBy: currentUser.uid,
+                    status: status,
+                    createdAt: serverTimestamp(),
+                    isRead: false,
+                    type: 'time-off-status-update'
+                });
+            } catch (error) {
+                console.error("Error sending notification: ", error);
+            }
         }
     };
 

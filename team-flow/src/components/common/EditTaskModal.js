@@ -4,7 +4,7 @@ import { ReactComponent as DotsIcon } from '../../assets/ellipsis-vertical.svg'
 import { ReactComponent as CalendarIcon } from '../../assets/calendar-filled.svg'
 import { ReactComponent as ArrowUpIcon } from '../../assets/arrow-up.svg'
 import { ReactComponent as ArrowDownIcon } from '../../assets/arrow-down.svg'
-import { deleteDoc, doc, updateDoc, Timestamp } from 'firebase/firestore'
+import { deleteDoc, doc, updateDoc, Timestamp, collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { Button, Dropdown, Form, Modal, ModalBody, ModalFooter } from 'react-bootstrap'
 import AvatarMini from './AvatarMini'
@@ -25,7 +25,7 @@ export default function EditTaskModal({ show, handleClose: close, task }) {
     const [priority, setPriority] = useState();
     const [assignedUsers, setAssignedUsers] = useState([]);
     const [teamUsers, setTeamUsers] = useState([]);
-
+    const { currentUser } = useAuth()
     const [modalPage, setModalPage] = useState(1);
     const [subtaskInput, setSubtaskInput] = useState('');
 
@@ -149,6 +149,26 @@ export default function EditTaskModal({ show, handleClose: close, task }) {
         }
     };
 
+    const sendTaskUpdateNotifications = async (assignedUserIds, taskData) => {
+        try {
+            assignedUserIds.forEach(async userId => {
+                // Nie wysyłaj powiadomienia do użytkownika, który aktualizuje zadanie
+                if (userId !== currentUser.uid) {
+                    const notificationRef = collection(db, "teams", teamId, "teamMembers", userId, "notifications");
+                    await addDoc(notificationRef, {
+                        createdBy: currentUser.uid,
+                        title: `Task updated: ${taskData.title}`,
+                        createdAt: serverTimestamp(),
+                        isRead: false,
+                        type: 'task-update',
+                        taskId: taskData.id
+                    });
+                }
+            });
+        } catch (error) {
+            console.error("Error sending task update notifications: ", error);
+        }
+    };
 
     // W EditTaskModal
     const handleUpdateTask = async () => {
@@ -177,6 +197,8 @@ export default function EditTaskModal({ show, handleClose: close, task }) {
             const taskRef = doc(db, 'teams', teamId, 'tasks', task.id);
             await updateDoc(taskRef, updatedTask);
             console.log('Task updated successfully');
+            sendTaskUpdateNotifications(assignedUserIds, updatedTask);
+
             handleClose(); // Zamknij modal po udanej aktualizacji
         } catch (error) {
             console.error('Error updating task: ', error);

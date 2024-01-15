@@ -2,6 +2,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
+  color: #2F2E41;
 }
 
 h1,
@@ -657,4 +658,14 @@ tr .today {
 
 .unread-notification{
   background-color:#d9ebff;
+}
+
+.widget-title{
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.tasks-widget{
+  background-color: #e7e7e7;
 }

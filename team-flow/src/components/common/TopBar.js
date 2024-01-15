@@ -263,7 +263,42 @@ export default function TopBar() {
                           </Link>
                         )
                       }
-
+                      {
+                        notification.type === 'task-assignment' && (
+                          <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} >
+                            <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
+                              <div className='d-flex align-items-center justify-content-between'>
+                                <div className='d-flex gap-2 align-items-center notification-container'>
+                                  <AvatarMini userId={notification.createdBy} />
+                                  <div style={{ fontSize: '0.9rem', color: '#828282' }}>New task assigned!</div>
+                                </div>
+                                {!notification.isRead && <div className='notification-dot'></div>}
+                                <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                                  {formatDate(notification.createdAt)}
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        )
+                      }
+                      {
+                        notification.type === 'task-update' && (
+                          <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} >
+                            <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
+                              <div className='d-flex align-items-center justify-content-between'>
+                                <div className='d-flex gap-2 align-items-center notification-container'>
+                                  <AvatarMini userId={notification.createdBy} />
+                                  <div style={{ fontSize: '0.9rem', color: '#828282' }}>Task updated!</div>
+                                </div>
+                                {!notification.isRead && <div className='notification-dot'></div>}
+                                <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                                  {formatDate(notification.createdAt)}
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        )
+                      }
                     </div>
                   ))}
                 </div>

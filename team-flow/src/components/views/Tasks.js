@@ -3,7 +3,7 @@ import MainLayout from '../../layouts/MainLayout';
 import Loading from '../common/Loading'
 import useTeamExists from '../../hooks/useTeamExists';
 import TaskItem from '../common/TaskItem';
-import { addDoc, collection, Timestamp, getDocs, onSnapshot } from 'firebase/firestore';
+import { addDoc, collection, Timestamp, getDocs, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase'; // ścieżka do Twojej konfiguracji Firebase
 import { Button, Dropdown, Form, Modal } from 'react-bootstrap';
 import { useUserTeamData } from '../../contexts/TeamContext';
@@ -198,6 +198,27 @@ export default function Tasks() {
     setSubtaskInput('');
   };
 
+  const sendTaskAssignmentNotifications = async (assignedUserIds, taskData) => {
+    try {
+      assignedUserIds.forEach(async userId => {
+
+        if (userId !== currentUser.uid) {
+          const notificationRef = collection(db, "teams", teamId, "teamMembers", userId, "notifications");
+          await addDoc(notificationRef, {
+            createdBy: currentUser.uid,
+            title: `New task assigned: ${taskData.title}`,
+            createdAt: serverTimestamp(),
+            isRead: false,
+            type: 'task-assignment',
+          });
+        }
+      });
+    } catch (error) {
+      console.error("Error sending task assignment notifications: ", error);
+    }
+  };
+
+
   const handleSaveTask = async () => {
     // Logika zapisywania zadania
     // Po zapisaniu możesz zamknąć modal lub zresetować stan strony
@@ -227,6 +248,8 @@ export default function Tasks() {
     try {
       await addDoc(collection(db, 'teams', teamId, 'tasks'), taskData);
       console.log('Task added successfully');
+      sendTaskAssignmentNotifications(assignedUserIds, taskData);
+
     } catch (error) {
       console.error('Error adding task: ', error);
     }
