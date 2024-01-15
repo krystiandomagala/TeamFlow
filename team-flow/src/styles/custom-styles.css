@@ -546,7 +546,6 @@ tr .today {
   height: 150px;
 }
 
-
 .ooo{
   background-color: #ff9a1f !important;
   transition: background-color 0.15s ease-in-out;
@@ -668,4 +667,13 @@ tr .today {
 
 .tasks-widget{
   background-color: #e7e7e7;
+}
+
+
+.table-month-view-mini{
+  font-size: 0.8rem;
+}
+
+.table-week-view-mini{
+  font-size: 0.8rem;
 }

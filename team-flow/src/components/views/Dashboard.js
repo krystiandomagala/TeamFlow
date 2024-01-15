@@ -13,6 +13,7 @@ import TaskWidget from '../common/TaskWidget';
 import TeamMemberWidget from '../common/TeamMemberWidget';
 import RequestItem from '../common/RequestItem';
 import RequestWidget from '../common/RequestWidget';
+import MiniCalendar from '../common/MiniCalendar';
 
 export default function Dashboard() {
   const [error, setError] = useState('');
@@ -36,7 +37,7 @@ export default function Dashboard() {
         const q = query(
           collection(db, 'teams', teamId, 'time-offs'),
           orderBy('createdAt', 'desc'),
-          limit(4)
+          limit(7)
         );
 
         const querySnapshot = await getDocs(q);
@@ -121,11 +122,29 @@ export default function Dashboard() {
 
   return (
     <MainLayout>
-      <div className='my-3 d-flex flex-column w-100'>
-        <h3>{teamName}</h3>
+      <div className='my-3 pe-3 d-flex flex-column w-100' style={{ overflowY: 'auto', overflowX: "hidden" }}>
         <h1 className='mb-2'>Dashboard</h1>
         <Row>
-          <Col>
+          <Col lg={8} md={12} className='mt-3'>
+            <div className='widget-title mb-1'>Calendar</div>
+            <div className='p-2 d-flex gap-2 flex-column rounded-4' style={{ border: '8px solid #e7e7e7' }}>
+              <MiniCalendar />
+            </div>
+          </Col>
+          <Col className='mt-3'>
+            <div className='widget-title mb-1' >Team</div>
+            <Link to={`/${teamId}/team`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className='p-2 d-flex gap-2 flex-column rounded-4 tasks-widget' style={{ height: 'calc(100% - 32px)' }}>
+                {teamMembers.length === 0 && <p>No team members found.</p>}
+                {teamMembers.slice(0, 5).map(member => (
+                  <TeamMemberWidget key={member.uid} member={member} isAdmin={isUserAdmin(member.uid)} />
+                ))}
+              </div>
+            </Link>
+          </Col>
+        </Row>
+        <Row>
+          <Col md={12} lg={6} className='mt-3'>
             <div className='widget-title mb-1'>Tasks</div>
             <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div className='p-2 d-flex gap-2 flex-column rounded-4 tasks-widget'>
@@ -136,23 +155,10 @@ export default function Dashboard() {
               </div>
             </Link>
           </Col>
-          <Col>
-            <div className='widget-title mb-1'>Team</div>
-            <Link to={`/${teamId}/team`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className='p-2 d-flex gap-2 flex-column rounded-4 tasks-widget'>
-                {teamMembers.length === 0 && <p>No team members found.</p>}
-                {teamMembers.slice(0, 5).map(member => (
-                  <TeamMemberWidget key={member.uid} member={member} isAdmin={isUserAdmin(member.uid)} />
-                ))}
-              </div>
-            </Link>
-          </Col>
-        </Row>
-        <Row>
-          <Col>
+          <Col md={12} lg={6} className='mt-3'>
             <div className='widget-title mb-1'>Time-off requests</div>
             <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className='p-2 d-flex gap-2 flex-column rounded-4 tasks-widget'>
+              <div className='p-2 d-flex gap-2 flex-column rounded-4 tasks-widget' >
                 {timeOffRequests.length === 0 && <p>No time-off requests found.</p>}
                 {timeOffRequests.map(request => (
                   <RequestWidget key={request.id} request={request} />
@@ -161,8 +167,6 @@ export default function Dashboard() {
             </Link>
           </Col>
         </Row>
-        <Row></Row>
-
       </div>
     </MainLayout>
   );

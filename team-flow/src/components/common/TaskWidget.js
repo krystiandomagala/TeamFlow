@@ -99,24 +99,14 @@ export default function TaskWidget({ task, teamId }) {
 
     return (
         <div className='task-item p-3 rounded-4'>
-            <div className='d-flex justify-content-between mb-3' >
-                <div className='d-flex gap-3'>
-                    <span className='d-inline-flex align-items-center gap-1 task-priority'>
-                        <ExclamationIcon className={`exclamation-icon ${priorityClass}`} />
-                        <span><span className='text-capitalize'>{task.priority}</span> priority</span>
-                    </span>
-                    <div className='d-flex align-items-center gap-1 task-progress'>
-                        <span className={`progress-icon ${stateClass}`}></span>
-                        <span>{taskStatus}</span>
-                    </div>
-                </div>
+            <div className='d-flex justify-content-between mb-2' >
                 <div className='d-flex align-items-center gap-2 deadline-text'>
                     <CalendarIcon />
                     <span>{deadlineDate}</span>
                 </div>
             </div>
 
-            <div>
+            <div style={{ marginTop: "11px" }}>
                 <span className='fw-bolder h4'>{task.title}</span>
                 <div className='subtitle'>{truncatedDescription}</div>
             </div>
