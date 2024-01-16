@@ -321,10 +321,3 @@ export default function TopBar() {
     </Navbar>
   );
 }
-
-
-const renderNotificationContent = (notification, teamId, formatDate) => {
-
-  // Domyślna treść dla nieznanych typów powiadomień
-  return <div>Notification</div>;
-};

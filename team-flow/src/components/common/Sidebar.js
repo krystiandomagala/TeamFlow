@@ -93,9 +93,6 @@ export default function Sidebar() {
               Time off Requests
             </MenuItem>
           </SubMenu>
-          <MenuItem active={window.location.pathname === `/${lastTeamId}/statistics`} icon={<StatisticsIcon />} component={<Link to={`/${lastTeamId}/statistics`} />}>
-            Statistics
-          </MenuItem>
           <MenuItem active={window.location.pathname === `/${lastTeamId}/team`} icon={<TeamIcon />} component={<Link to={`/${lastTeamId}/team`} />}>
             Team
           </MenuItem>

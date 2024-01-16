@@ -10,7 +10,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import EmailVerification from '../views/EmailVerification';
 import Dashboard from '../views/Dashboard';
 import Schedule from '../views/Schedule';
-import Statistics from '../views/Statistics';
 import Team from '../views/Team';
 import SelectTeam from '../views/SelectTeam';
 import Tasks from '../views/Tasks';
@@ -31,7 +30,6 @@ function App() {
                 <Route exact path='/:teamId/dashboard' element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 <Route path='/:teamId/schedule' element={<PrivateRoute><Schedule /></PrivateRoute>} />
                 <Route path='/:teamId/schedule/time-off-requests' element={<PrivateRoute><TimeOff /></PrivateRoute>} />
-                <Route path='/:teamId/statistics' element={<PrivateRoute><Statistics /></PrivateRoute>} />
                 <Route path='/:teamId/team' element={<PrivateRoute><Team /></PrivateRoute>} />
                 <Route path='/:teamId/tasks' element={<PrivateRoute><Tasks /></PrivateRoute>} />
 
