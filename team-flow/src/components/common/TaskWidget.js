@@ -108,7 +108,6 @@ export default function TaskWidget({ task, teamId }) {
 
             <div style={{ marginTop: "11px" }}>
                 <span className='fw-bolder h4'>{task.title}</span>
-                <div className='subtitle'>{truncatedDescription}</div>
             </div>
             <div className='mt-2 d-flex align-items-center gap-3'>
                 <div className='progress' style={{ maxWidth: "350px" }}>

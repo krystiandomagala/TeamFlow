@@ -168,7 +168,7 @@ export default function TimeOff() {
 
     return (
         <MainLayout>
-            <div className='my-3 pe-3 d-flex flex-column w-100 overflow-auto '>
+            <div className='my-3 pe-3 d-flex flex-column w-100 overflow-auto time-off-item'>
                 <h1>Time off requests</h1>
                 <Button onClick={handleShow}>+ New Request</Button>
                 <div className="divider mb-3 mt-4">

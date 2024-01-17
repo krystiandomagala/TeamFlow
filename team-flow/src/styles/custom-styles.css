@@ -374,6 +374,10 @@ h2 {
 
 }
 
+.request-item:hover{
+  background-color: red;
+}
+
 .shift-item {
   background-color: #1271fb;
   color: white;
@@ -391,6 +395,7 @@ h2 {
 }
 
 .task-item:hover,
+.request-item:hover,
 .team-member-item:hover {
   background-color: #f1f1f1;
 }

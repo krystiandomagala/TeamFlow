@@ -382,6 +382,8 @@ const Calendar = () => {
         const endOfMonth = currentMoment.clone().endOf('month');
         let totalMinutes = 0;
 
+        console.log(calendarShifts)
+
         Object.entries(calendarShifts).forEach(([cellId, shiftData]) => {
             if (cellId.startsWith(userId) && shiftData.date >= startOfMonth.format('YYYY-MM-DD') && shiftData.date <= endOfMonth.format('YYYY-MM-DD')) {
                 const shift = shifts.find(s => s.id === shiftData.shiftId);
@@ -404,8 +406,6 @@ const Calendar = () => {
 
         return [hours, minutes];
     };
-
-
 
 
     const renderWeekView = () => {
@@ -571,23 +571,27 @@ const Calendar = () => {
             const itemType = source.droppableId; // 'shifts' or 'ooos'
 
             setCalendarShifts(prev => {
-                if (itemType === 'vacations') {
-                    return { ...prev, [cellId]: { vacationId: vacationItem.id } };
-                } else {
-                    // Ensure vacation is removed when adding shifts or OOOs
-                    const updatedItem = {
-                        ...prev[cellId],
-                        [itemType === 'shifts' ? 'shiftId' : 'oooId']: result.draggableId,
-                        vacationId: null,
-                    };
-                    return { ...prev, [cellId]: updatedItem };
-                }
+                // Tworzenie lub aktualizacja wpisu z przeciągniętym elementem
+                const updatedShiftData = {
+                    // Pobieranie istniejących danych z prev[cellId], jeśli istnieją
+                    ...prev[cellId],
+                    [itemType === 'shifts' ? 'shiftId' : 'oooId']: itemId,
+                    vacationId: itemType === 'vacations' ? vacationItem.id : null,
+                    // Przypisanie daty na podstawie cellId
+                    date: cellId.split('_')[1] // zakładając, że cellId ma format 'userId_date'
+                };
+
+                return { ...prev, [cellId]: updatedShiftData };
             });
         }
+
+
+        console.log(Object.entries(calendarShifts).length)
 
         console.log(ooos)
         console.log(shifts)
         console.log(vacationItem)
+
     };
 
     const renderMonthView = () => {
@@ -893,5 +897,3 @@ const Calendar = () => {
 };
 
 export default Calendar;
-
-

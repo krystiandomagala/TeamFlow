@@ -13,6 +13,7 @@ import { ReactComponent as CrossIcon } from '../../assets/x.svg'
 import { ReactComponent as DotsIcon } from '../../assets/ellipsis-vertical.svg'
 import CalendarTask from './CalendarTask';
 import { useAuth } from '../../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Calendar = () => {
     const [currentMoment, setCurrentMoment] = useState(moment());
@@ -432,7 +433,10 @@ const Calendar = () => {
         <DragDropContext>
             <div className='d-flex flex-column'>
                 {renderCalendarHeader()}
-                {view === 'week' ? renderWeekView() : renderMonthView()}
+                <Link to={`/${teamId}/schedule`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    {view === 'week' ? renderWeekView() : renderMonthView()}
+
+                </Link>
             </div>
         </DragDropContext>
     );

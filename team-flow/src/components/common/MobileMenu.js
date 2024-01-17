@@ -271,7 +271,7 @@ export default function MobileMenu() {
             </Menu>
           </ProSidebar>
           <Button
-            className="btn btn-light me-2"
+            className="btn btn-light"
             onClick={() => setIsVisible(!isVisible)}
           >
             <MenuIcon />
@@ -279,16 +279,15 @@ export default function MobileMenu() {
         </>
       )}
 
-      <Dropdown align='end'>
-        <Dropdown.Toggle id='dropdown-avatar' style={{ backgroundColor: 'transparent', border: 'none' }} bsPrefix='p-0'>
-          <Avatar userId={currentUser.uid} />
-        </Dropdown.Toggle>
-        <div className='mx-3 d-flex align-items-center'>
-          <div className='notification-icon'>
-            <NotificationIcon size={32} onClick={toggleNotificationsMenu} style={{ cursor: 'pointer' }} />
-            {unreadNotificationsCount > 0 && (
-              <span className='notification-count'>{unreadNotificationsCount}</span>
-            )}
+      {
+        teamId !== undefined && (<>
+          <div className='mx-3 d-flex align-items-center'>
+            <div className='notification-icon'>
+              <NotificationIcon size={32} onClick={toggleNotificationsMenu} style={{ cursor: 'pointer' }} />
+              {unreadNotificationsCount > 0 && (
+                <span className='notification-count'>{unreadNotificationsCount}</span>
+              )}
+            </div>
           </div>
           {showNotificationsMenu && (
             <div className="notifications-menu border rounded-2" ref={notificationsMenuRef} >
@@ -389,7 +388,14 @@ export default function MobileMenu() {
               ))}
             </div>
           )}
-        </div>
+        </>
+        )
+      }
+      <Dropdown align='end'>
+        <Dropdown.Toggle id='dropdown-avatar' style={{ backgroundColor: 'transparent', border: 'none' }} bsPrefix='p-0'>
+          <Avatar userId={currentUser.uid} />
+        </Dropdown.Toggle>
+
         <Dropdown.Menu>
           <Dropdown.Item href='/settings'>Settings</Dropdown.Item>
           <Dropdown.Item onClick={navigateToSelectTeam}>Select team</Dropdown.Item>

@@ -37,7 +37,7 @@ export default function Dashboard() {
         const q = query(
           collection(db, 'teams', teamId, 'time-offs'),
           orderBy('createdAt', 'desc'),
-          limit(7)
+          limit(6)
         );
 
         const querySnapshot = await getDocs(q);

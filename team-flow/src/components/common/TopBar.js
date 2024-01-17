@@ -189,6 +189,7 @@ export default function TopBar() {
     }
   }
 
+  console.log(teamId)
 
   return (
     <Navbar className='border-bottom d-flex align-items-center justify-content-end'>
@@ -197,113 +198,117 @@ export default function TopBar() {
           <MobileMenu />
         ) : (
           <>
-            <Nav.Item className='mx-3 d-flex align-items-center'>
-              <div className='notification-icon'>
-                <NotificationIcon size={32} onClick={toggleNotificationsMenu} style={{ cursor: 'pointer' }} />
-                {unreadNotificationsCount > 0 && (
-                  <span className='notification-count'>{unreadNotificationsCount}</span>
-                )}
-              </div>
-              {showNotificationsMenu && (
-                <div className="notifications-menu border rounded-2" ref={notificationsMenuRef} >
+            {teamId !== undefined && (
+              <>
+                <Nav.Item className='mx-3 d-flex align-items-center'>
+                  <div className='notification-icon'>
+                    <NotificationIcon size={32} onClick={toggleNotificationsMenu} style={{ cursor: 'pointer' }} />
+                    {unreadNotificationsCount > 0 && (
+                      <span className='notification-count'>{unreadNotificationsCount}</span>
+                    )}
+                  </div>
+                  {showNotificationsMenu && (
+                    <div className="notifications-menu border rounded-2" ref={notificationsMenuRef} >
 
-                  {notifications.sort((a, b) => b.createdAt - a.createdAt).map((notification, index) => (
-                    <div key={index}>
-                      {
-                        notification.type === 'schedule' && (
-                          <Link to={`/${teamId}/schedule`} style={{ textDecoration: 'none' }}>
-                            <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
-                              <div className='d-flex align-items-center justify-content-between'>
-                                <div className='d-flex gap-2 align-items-center notification-container'>
-                                  <AvatarMini userId={notification.createdBy} />
-                                  <div style={{ fontSize: '0.9rem', color: '#828282' }}>Schedule updated!</div>
+                      {notifications.sort((a, b) => b.createdAt - a.createdAt).map((notification, index) => (
+                        <div key={index}>
+                          {
+                            notification.type === 'schedule' && (
+                              <Link to={`/${teamId}/schedule`} style={{ textDecoration: 'none' }}>
+                                <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
+                                  <div className='d-flex align-items-center justify-content-between'>
+                                    <div className='d-flex gap-2 align-items-center notification-container'>
+                                      <AvatarMini userId={notification.createdBy} />
+                                      <div style={{ fontSize: '0.9rem', color: '#828282' }}>Schedule updated!</div>
+                                    </div>
+                                    {!notification.isRead && <div className='notification-dot'></div>}
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                                      {formatDate(notification.createdAt)}
+                                    </div>
+                                  </div>
                                 </div>
-                                {!notification.isRead && <div className='notification-dot'></div>}
-                                <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
-                                  {formatDate(notification.createdAt)}
+                              </Link>
+                            )
+                          }
+                          {
+                            notification.type === 'time-off-request' && (
+                              <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none' }} >
+                                <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
+                                  <div className='d-flex align-items-center justify-content-between'>
+                                    <div className='d-flex gap-2 align-items-center notification-container'>
+                                      <AvatarMini userId={notification.createdBy} />
+                                      <div style={{ fontSize: '0.9rem', color: '#828282' }}>Time off request</div>
+                                    </div>
+                                    {!notification.isRead && <div className='notification-dot'></div>}
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                                      {formatDate(notification.createdAt)}
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                          </Link>
-                        )
-                      }
-                      {
-                        notification.type === 'time-off-request' && (
-                          <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none' }} >
-                            <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
-                              <div className='d-flex align-items-center justify-content-between'>
-                                <div className='d-flex gap-2 align-items-center notification-container'>
-                                  <AvatarMini userId={notification.createdBy} />
-                                  <div style={{ fontSize: '0.9rem', color: '#828282' }}>Time off request</div>
+                              </Link>
+                            )
+                          }
+                          {
+                            notification.type === 'time-off-status-update' && (
+                              <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none' }} >
+                                <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
+                                  <div className='d-flex align-items-center justify-content-between'>
+                                    <div className='d-flex gap-2 align-items-center notification-container'>
+                                      <AvatarMini userId={notification.createdBy} />
+                                      <div style={{ fontSize: '0.9rem', color: '#828282' }}>Request {notification.status}</div>
+                                    </div>
+                                    {!notification.isRead && <div className='notification-dot'></div>}
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                                      {formatDate(notification.createdAt)}
+                                    </div>
+                                  </div>
                                 </div>
-                                {!notification.isRead && <div className='notification-dot'></div>}
-                                <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
-                                  {formatDate(notification.createdAt)}
+                              </Link>
+                            )
+                          }
+                          {
+                            notification.type === 'task-assignment' && (
+                              <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} >
+                                <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
+                                  <div className='d-flex align-items-center justify-content-between'>
+                                    <div className='d-flex gap-2 align-items-center notification-container'>
+                                      <AvatarMini userId={notification.createdBy} />
+                                      <div style={{ fontSize: '0.9rem', color: '#828282' }}>New task assigned!</div>
+                                    </div>
+                                    {!notification.isRead && <div className='notification-dot'></div>}
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                                      {formatDate(notification.createdAt)}
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-                          </Link>
-                        )
-                      }
-                      {
-                        notification.type === 'time-off-status-update' && (
-                          <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none' }} >
-                            <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
-                              <div className='d-flex align-items-center justify-content-between'>
-                                <div className='d-flex gap-2 align-items-center notification-container'>
-                                  <AvatarMini userId={notification.createdBy} />
-                                  <div style={{ fontSize: '0.9rem', color: '#828282' }}>Request {notification.status}</div>
+                              </Link>
+                            )
+                          }
+                          {
+                            notification.type === 'task-update' && (
+                              <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} >
+                                <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
+                                  <div className='d-flex align-items-center justify-content-between'>
+                                    <div className='d-flex gap-2 align-items-center notification-container'>
+                                      <AvatarMini userId={notification.createdBy} />
+                                      <div style={{ fontSize: '0.9rem', color: '#828282' }}>Task updated!</div>
+                                    </div>
+                                    {!notification.isRead && <div className='notification-dot'></div>}
+                                    <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
+                                      {formatDate(notification.createdAt)}
+                                    </div>
+                                  </div>
                                 </div>
-                                {!notification.isRead && <div className='notification-dot'></div>}
-                                <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
-                                  {formatDate(notification.createdAt)}
-                                </div>
-                              </div>
-                            </div>
-                          </Link>
-                        )
-                      }
-                      {
-                        notification.type === 'task-assignment' && (
-                          <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} >
-                            <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
-                              <div className='d-flex align-items-center justify-content-between'>
-                                <div className='d-flex gap-2 align-items-center notification-container'>
-                                  <AvatarMini userId={notification.createdBy} />
-                                  <div style={{ fontSize: '0.9rem', color: '#828282' }}>New task assigned!</div>
-                                </div>
-                                {!notification.isRead && <div className='notification-dot'></div>}
-                                <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
-                                  {formatDate(notification.createdAt)}
-                                </div>
-                              </div>
-                            </div>
-                          </Link>
-                        )
-                      }
-                      {
-                        notification.type === 'task-update' && (
-                          <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} >
-                            <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
-                              <div className='d-flex align-items-center justify-content-between'>
-                                <div className='d-flex gap-2 align-items-center notification-container'>
-                                  <AvatarMini userId={notification.createdBy} />
-                                  <div style={{ fontSize: '0.9rem', color: '#828282' }}>Task updated!</div>
-                                </div>
-                                {!notification.isRead && <div className='notification-dot'></div>}
-                                <div style={{ fontSize: '0.9rem', fontWeight: '500' }}>
-                                  {formatDate(notification.createdAt)}
-                                </div>
-                              </div>
-                            </div>
-                          </Link>
-                        )
-                      }
+                              </Link>
+                            )
+                          }
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </Nav.Item>
+                  )}
+                </Nav.Item>
+              </>
+            )}
             <Dropdown align='end'>
               <Dropdown.Toggle id='dropdown-avatar' style={{ backgroundColor: 'transparent', border: 'none' }} bsPrefix='p-0'>
                 <Avatar userId={currentUser.uid} />
