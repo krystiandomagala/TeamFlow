@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import MainLayout from '../../layouts/MainLayout';
-import { Card, Button, Alert, Container, Row, Col } from 'react-bootstrap';
+import { Card, Button, Alert, Container, Row, Col, Spinner } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import useTeamExists from '../../hooks/useTeamExists';
@@ -27,12 +27,13 @@ export default function Dashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [teamData, setTeamData] = useState(null);
   const { getTeamData, isUserTeamAdmin } = useUserTeamData();
-  const [loading, setLoading] = useState(true);
   const [timeOffRequests, setTimeOffRequests] = useState([]);
+  const [isLoadingTimeOff, setIsLoadingTimeOff] = useState(true);
+  const [isLoadingTeamMembers, setIsLoadingTeamMembers] = useState(true);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
 
   useEffect(() => {
     const fetchTimeOffRequests = async () => {
-      setLoading(true);
       try {
         const q = query(
           collection(db, 'teams', teamId, 'time-offs'),
@@ -50,7 +51,7 @@ export default function Dashboard() {
       } catch (error) {
         console.error('Error fetching time-off requests:', error);
       } finally {
-        setLoading(false);
+        setIsLoadingTimeOff(false)
       }
     };
 
@@ -161,10 +162,12 @@ export default function Dashboard() {
             <div className='widget-title mb-1'>Time-off requests</div>
             <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div className='p-2 d-flex gap-2 flex-column rounded-4 tasks-widget' >
+                {isLoadingTimeOff && <div> test</div>}
                 {timeOffRequests.length === 0 && <span className="lack-of-data m-3">No time-off requests found</span>}
-                {timeOffRequests.map(request => (
-                  <RequestWidget key={request.id} request={request} />
-                ))}
+                {
+                  timeOffRequests.map(request => (
+                    <RequestWidget key={request.id} request={request} />
+                  ))}
               </div>
             </Link>
           </Col>

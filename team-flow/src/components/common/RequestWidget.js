@@ -3,7 +3,7 @@ import AvatarMini from './AvatarMini';
 import { useUser } from '../../contexts/UserContext'; // Zaktualizuj ścieżkę
 import moment from 'moment';
 import { ReactComponent as CalendarIcon } from '../../assets/calendar-filled.svg'
-import { Alert, Button, Dropdown } from 'react-bootstrap';
+import { Alert, Button, Dropdown, Spinner } from 'react-bootstrap';
 import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import useTeamExists from '../../hooks/useTeamExists';
@@ -15,7 +15,6 @@ export default function RequestWidget({ request, isAdmin }) {
     const [userData, setUserData] = useState(null);
     const { getUserData } = useUser();
     const { teamId } = useTeamExists()
-
     useEffect(() => {
         async function fetchUserData() {
             const data = await getUserData(request.user);
@@ -48,32 +47,31 @@ export default function RequestWidget({ request, isAdmin }) {
 
     return (
         <div className='p-3 rounded-3 request-item  overflow-visible'>
-            {userData && (
-                <div>
-                    <div className='d-flex justify-content-between'>
-                        <div className='d-flex align-items-center gap-2'>
+            <div>
+                <div className='d-flex justify-content-between'>
+                    <div className='d-flex align-items-center gap-2'>
+                        {userData ? (<>
                             <AvatarMini userId={request.user} />
                             {userData.fullName}
-                        </div>
-                        <div className='d-flex gap-4'>
-                            <div className='d-flex align-items-center gap-2 deadline-text'>
-                                <CalendarIcon />
-                                {
-                                    formatDate(request.startDate) === formatDate(request.endDate) ? (
-                                        <span>{formatDate(request.startDate)}</span>
+                        </>) : <Spinner animation="border" variant="primary" size="sm" />}
+                    </div>
+                    <div className='d-flex gap-4'>
+                        <div className='d-flex align-items-center gap-2 deadline-text'>
+                            <CalendarIcon />
+                            {
+                                formatDate(request.startDate) === formatDate(request.endDate) ? (
+                                    <span>{formatDate(request.startDate)}</span>
 
-                                    ) : (
-                                        <span>{formatDate(request.startDate)} - {formatDate(request.endDate)}</span>
-                                    )
-                                }
-                            </div>
-                            <Alert variant={requestStatus(request.status)} className='rounded-5 px-3 py-1 m-0 d-flex align-items-center' style={{ textTransform: 'capitalize', fontSize: '0.8rem' }}>{request.status}</Alert>
-
+                                ) : (
+                                    <span>{formatDate(request.startDate)} - {formatDate(request.endDate)}</span>
+                                )
+                            }
                         </div>
+                        <Alert variant={requestStatus(request.status)} className='rounded-5 px-3 py-1 m-0 d-flex align-items-center' style={{ textTransform: 'capitalize', fontSize: '0.8rem' }}>{request.status}</Alert>
+
                     </div>
                 </div>
-            )
-            }
-        </div >
+            </div>
+        </div>
     );
 }

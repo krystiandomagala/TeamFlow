@@ -17,7 +17,7 @@ export default function Settings() {
     const [previewUrl, setPreviewUrl] = useState('');
     const { currentUser } = useAuth();
     const { getUserData } = useUser()
-    const [user, setUser] = useState();
+    const [user, setUser] = useState({ email: '' });
     const [isEditMode, setIsEditMode] = useState(false);
     const [showInitials, setShowInitials] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -38,8 +38,8 @@ export default function Settings() {
     useEffect(() => {
         if (currentUser.uid) {
             getUserData(currentUser.uid).then(data => {
-                setUser(data);
-                setFullName(data.fullName); // Set the initial full name
+                setUser(data || {});
+                setFullName(data?.fullName || '');
             });
         }
     }, [currentUser.uid, getUserData, isEditMode, uploaded]);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Form } from 'react-bootstrap';
+import { Button, Modal, Form, Spinner } from 'react-bootstrap';
 import { useUserTeamData } from '../../contexts/TeamContext'; // Hook do zarządzania danymi zespołu użytkownika
 import TopBar from '../common/TopBar'; // Komponent paska górnego
 import { Link } from 'react-router-dom'; // Link z react-router-dom do nawigacji
@@ -13,23 +13,23 @@ export default function SelectTeam() {
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
   const [showJoinTeamModal, setShowJoinTeamModal] = useState(false);
   const [teams, setTeams] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Efekt służący do pobrania zespołów użytkownika z serwera
   useEffect(() => {
     let isSubscribed = true;
+    setIsLoading(true); // Rozpoczęcie ładowania
 
-    // Pobiera zespoły użytkownika i aktualizuje stan
     getUserTeams().then((fetchedTeams) => {
       if (isSubscribed) {
         setTeams(fetchedTeams);
+        setIsLoading(false); // Zakończenie ładowania
       }
     });
 
-    // Funkcja czyszcząca do uniknięcia wycieków pamięci
     return () => {
       isSubscribed = false;
     };
-  }, [getUserTeams]); // Efekt będzie uruchomiony ponownie, gdy zmienią się `getUserTeams`
+  }, [getUserTeams]);
 
   // Obsługa tworzenia nowego zespołu
   const handleCreateTeam = (e) => {
@@ -67,14 +67,21 @@ export default function SelectTeam() {
 
           <h2>Your teams</h2>
           <div className='d-flex gap-3 py-3 teams-wrapper scrollbar'>
-            {teams.map((team) => (
-              <div key={team.id}>
-                <Link to={`/${team.id}/dashboard`} style={{ textDecoration: 'none' }} onClick={() => handleSelectTeam(team.id)}>
-                  <TeamItem team={team} />
-                </Link>
-              </div>
-            ))}
+            {isLoading ? (
+              <Spinner animation="border" variant="primary">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+            ) : (
+              teams.map((team) => (
+                <div key={team.id}>
+                  <Link to={`/${team.id}/dashboard`} style={{ textDecoration: 'none' }} onClick={() => handleSelectTeam(team.id)}>
+                    <TeamItem team={team} />
+                  </Link>
+                </div>
+              ))
+            )}
           </div>
+
 
           <TeamModal
             show={showCreateTeamModal}

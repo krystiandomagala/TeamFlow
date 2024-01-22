@@ -12,57 +12,12 @@ function TeamMemberItem({ member, isAdmin, onRemove, onLeaveTeam, onGrantAdmin, 
     // Przykładowe wyświetlanie danych członka zespołu
     const [isCurrentUserAdmin, setIsCurrentUserAdmin] = useState(false);
     const { teamId } = useTeamExists();
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const { currentUser } = useAuth()
-    const [showLeaveConfirmModal, setShowLeaveConfirmModal] = useState(false);
-    const [showGrantAdminConfirmModal, setShowGrantAdminConfirmModal] = useState(false);
-    const [showRevokeAdminConfirmModal, setShowRevokeAdminConfirmModal] = useState(false);
 
-    const navigate = useNavigate();
-
-
-    const handleRevokeAdminClick = () => {
-        setShowRevokeAdminConfirmModal(true);
-    };
-
-    const handleConfirmRevokeAdmin = () => {
-        onRevokeAdmin(member.uid);
-        setShowRevokeAdminConfirmModal(false);
-    };
-
-    const handleGrantAdminClick = () => {
-        setShowGrantAdminConfirmModal(true);
-    };
-
-    const handleConfirmGrantAdmin = () => {
-        onGrantAdmin(member.uid);
-        setShowGrantAdminConfirmModal(false);
-    };
-
-    const handleConfirmLeave = () => {
-        // Logic to leave the team
-        // After leaving the team, redirect the user
-        onLeaveTeam(); // Call the function passed from parent
-        // Don't forget to close the modal
-        setShowLeaveConfirmModal(false);
-    };
-
-    const handleLeaveClick = () => {
-        setShowLeaveConfirmModal(true);
-    };
-
-    const handleRemoveClick = () => {
-        setShowConfirmModal(true);
-    };
-
-    const handleConfirmRemove = () => {
-        onRemove(member.uid);
-        setShowConfirmModal(false);
-    };
     useEffect(() => {
         async function checkUserStatus() {
             const adminStatus = await isUserTeamAdmin(teamId);
             setIsCurrentUserAdmin(adminStatus)
+
         }
 
         checkUserStatus()
