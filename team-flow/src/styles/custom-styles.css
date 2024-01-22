@@ -2,7 +2,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  color: #2F2E41;
+  color: #2f2e41;
 }
 
 h1,
@@ -189,12 +189,12 @@ h2 {
   cursor: pointer;
 }
 .chat-item-not-active:hover,
-.task-select-user:hover, 
-.notification-item:hover{
+.task-select-user:hover,
+.notification-item:hover {
   background-color: #f5f5f5;
 }
 
-.notification-item{
+.notification-item {
   transition: background-color 0.1s ease-in;
 }
 
@@ -364,18 +364,13 @@ h2 {
 
 .task-item,
 .team-member-item,
-.shift-item, 
+.shift-item,
 .request-item {
   background-color: #fbfbfb;
   transition: background-color 0.15s ease-in-out;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
   text-overflow: ellipsis;
   overflow: hidden;
-
-}
-
-.request-item:hover{
-  background-color: red;
 }
 
 .shift-item {
@@ -384,8 +379,8 @@ h2 {
   transition: background-color 0.15s ease-in-out;
 }
 
-.shift-item .hours{
-  color:rgba(255, 255, 255, 0.6);
+.shift-item .hours {
+  color: rgba(255, 255, 255, 0.6);
   text-overflow: ellipsis;
   overflow: hidden;
 }
@@ -534,7 +529,7 @@ table {
   table-layout: fixed;
 }
 
-.table-week-view tr th:nth-child(1){
+.table-week-view tr th:nth-child(1) {
   width: 150px;
 }
 
@@ -542,71 +537,71 @@ tr .today {
   color: #1271fb;
 }
 
-.highlight{
+.highlight {
   background-color: #dcf3e9 !important;
   transition: background-color 0.2s;
 }
 
-.table-month-view tbody tr{
+.table-month-view tbody tr {
   height: 150px;
 }
 
-.ooo{
+.ooo {
   background-color: #ff9a1f !important;
   transition: background-color 0.15s ease-in-out;
 }
 
-.ooo:hover{
+.ooo:hover {
   background-color: #ff9a1f9d !important;
 }
 
-.vacation{
-  background-color: #00D370 !important;
+.vacation {
+  background-color: #00d370 !important;
   transition: background-color 0.15s ease-in-out;
 }
 
-.vacation:hover{
+.vacation:hover {
   background-color: #00d3708a !important;
 }
 
 .remove-icon {
-    cursor: pointer;
-    color: white !important;
+  cursor: pointer;
+  color: white !important;
 }
 
 .tooltip-left-align .tooltip-inner {
-    text-align: left;
+  text-align: left;
 }
 
-.tooltip-inner .avatar-mini{
+.tooltip-inner .avatar-mini {
   outline-color: #000;
 }
 
-.user-info{
+.user-info {
   color: #828282;
   font-size: 0.9rem;
 }
 
-.shift-item .avatar-mini{
-  outline-color:#1271fb;
+.shift-item .avatar-mini {
+  outline-color: #1271fb;
 }
 
-.task-item-calendar{
+.task-item-calendar {
   box-shadow: none;
   background-color: #ababab;
-  color:rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .shift-item .avatar-mini {
-  outline-color: transparent; 
+  outline-color: transparent;
 }
 
-.submenu-item{
+.submenu-item {
   font-size: 0.9rem;
   padding-bottom: 5px;
 }
 
-.request-btn{
+.request-btn {
   aspect-ratio: 1/1;
   border-radius: 100%;
   display: flex;
@@ -635,12 +630,10 @@ tr .today {
   justify-content: center;
 }
 
-
-.notifications-menu{
+.notifications-menu {
   position: absolute;
   top: 50px;
   right: 60px;
-  min-height: 300px;
   max-height: 400px;
   overflow: auto;
   min-width: 300px;
@@ -648,37 +641,41 @@ tr .today {
   z-index: 1000;
 }
 
-
-.notification-dot{
+.notification-dot {
   background-color: #1271fb;
   height: 10px;
   width: 10px;
   border-radius: 5px;
 }
 
-.notification-container .avatar-mini{
+.notification-container .avatar-mini {
   outline-color: transparent;
 }
 
-.unread-notification{
-  background-color:#d9ebff;
+.unread-notification {
+  background-color: #d9ebff;
 }
 
-.widget-title{
+.widget-title {
   text-transform: uppercase;
   font-weight: bold;
   font-size: 1.2rem;
 }
 
-.tasks-widget{
+.tasks-widget {
   background-color: #e7e7e7;
 }
 
-
-.table-month-view-mini{
+.table-month-view-mini {
   font-size: 0.8rem;
 }
 
-.table-week-view-mini{
+.table-week-view-mini {
   font-size: 0.8rem;
+}
+
+.team-name {
+  color: #ababab;
+  font-size: 1.2rem;
+  font-weight: 600;
 }

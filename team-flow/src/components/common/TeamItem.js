@@ -23,11 +23,10 @@ export default function TeamItem({ team }) {
     <Card className='team-item-container'>
       <Card.Header className='team-creation-date'>
         <div className='team-creation-date-header'>created at</div>
-        {formatDateFromSeconds(team.createdAt.seconds)}</Card.Header>
+        {formatDateFromSeconds(team.createdAt._seconds)}</Card.Header>
       <Card.Body>
         <Card.Title className='ellipsis team-item-header'>{team.name}</Card.Title>
         <hr className='team-card-divider' />
-        <p className='subtitle'>Opis teamu</p>
         <span className='mini-title'>Members</span>
         <div className='mt-1 d-flex'>
           {team.memberIds.slice(0, 3).map((user, index) => (

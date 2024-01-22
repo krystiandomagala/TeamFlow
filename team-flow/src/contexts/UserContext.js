@@ -10,19 +10,24 @@ export function useUser() {
 
 export function UserProvider({ children }) {
 
-  async function getUserData(userId) {
-    const userDocRef = doc(db, 'users', userId);
+  const getUserData = async (userId) => {
     try {
-      const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-        return docSnap.data();
-      } else {
-        console.log('No such document!');
+      // Wykonanie żądania HTTP GET do funkcji Cloud Functions
+      const response = await fetch(`https://getuserdata-ff4yiokesq-ey.a.run.app?userId=${userId}`);
+
+      if (!response.ok) {
+        console.error('Error Response:', response.statusText);
+        // Tutaj obsłuż błędy, np. wyświetlając komunikat
+        return;
       }
+
+      const userData = await response.json();
+      return userData;
     } catch (error) {
-      console.error("Error fetching user data: ", error);
+      console.error('Error:', error);
+      // Tutaj obsłuż błędy związane z siecią lub innymi wyjątkami
     }
-  }
+  };
 
   const value = {
     getUserData

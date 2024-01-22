@@ -185,6 +185,10 @@ export default function TimeOff() {
                             {isRequestsExpanded ? <><ArrowUpIcon /> Show less </> : <> <ArrowDownIcon />Show more</>}
                         </div>
                     )}
+                    {requests.length < 1 && (
+                        <div className="lack-of-data mt-3">
+                            No time-off requests in your team
+                        </div>)}
                 </div>
                 <div className="divider mb-3 mt-4">
                     <span>Your Requests</span>
@@ -198,6 +202,10 @@ export default function TimeOff() {
                             {isYourRequestsExpanded ? <><ArrowUpIcon /> Show less </> : <> <ArrowDownIcon />Show more</>}
                         </div>
                     )}
+                    {currentUserRequests.length < 1 && (
+                        <div className="lack-of-data mt-3">
+                            You don't have any time-off rquests
+                        </div>)}
                 </div>
             </div>
             <Modal show={show} onHide={handleClose} centered>

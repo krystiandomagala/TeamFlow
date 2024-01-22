@@ -210,6 +210,7 @@ export default function TopBar() {
                   {showNotificationsMenu && (
                     <div className="notifications-menu border rounded-2" ref={notificationsMenuRef} >
 
+                      {notifications.length === 0 && (<div className='m-3 lack-of-data'>No notifications</div>)}
                       {notifications.sort((a, b) => b.createdAt - a.createdAt).map((notification, index) => (
                         <div key={index}>
                           {

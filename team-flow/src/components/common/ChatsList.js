@@ -136,6 +136,9 @@ export default function ChatsList({ onChatSelect }) {
     }
   };
 
+  const isUserInChats = (userId) => {
+    return Object.values(chats).some(chat => chat.userInfo && chat.userInfo.uid === userId);
+  };
 
   return (
     <div className='border-end chat-list pt-3 pe-md-3 '>
@@ -144,14 +147,20 @@ export default function ChatsList({ onChatSelect }) {
         <PlusIcon className='icon-btn' onClick={handleShow} />
         <Modal show={showModal} onHide={handleClose} centered>
           <Modal.Header closeButton>
-            <Modal.Title>Create new chat</Modal.Title>
+            <Modal.Title>Add New Chat</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {teamMembers.map((member, index) => (
-              <div key={index} onClick={() => handleSelect(member.uid)}>
-                <NewChatListItem user={member} />
-              </div>
-            ))}
+            {teamMembers.filter(member => !isUserInChats(member.uid)).length > 0 ? (
+              teamMembers
+                .filter(member => !isUserInChats(member.uid))
+                .map((member, index) => (
+                  <div key={index} onClick={() => handleSelect(member.uid)}>
+                    <NewChatListItem user={member} />
+                  </div>
+                ))
+            ) : (
+              <div className="text-center lack-of-data">No new chats</div>
+            )}
           </Modal.Body>
         </Modal>
       </div>
