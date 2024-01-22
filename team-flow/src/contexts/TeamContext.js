@@ -28,7 +28,7 @@ export const UserTeamDataProvider = ({ children }) => {
     const userUid = currentUser.uid; // Zakładając, że currentUser to aktualnie zalogowany użytkownik
 
     try {
-      const response = await fetch('https://createteam-ff4yiokesq-ey.a.run.app', { // Zmień '/createTeam' na właściwy URL funkcji Cloud
+      const response = await fetch('https://createteam-ff4yiokesq-ey.a.run.app', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,6 +57,10 @@ export const UserTeamDataProvider = ({ children }) => {
   // Asynchroniczna funkcja do dołączania do zespołu
   // Funkcja, którą przypiszesz do przycisku 'Join Team' w Twoim komponencie React
   const joinTeam = async (accessCode) => {
+
+    const userUid = currentUser.uid; // Zakładając, że currentUser to aktualnie zalogowany użytkownik
+
+
     try {
       // Wykonanie żądania HTTP POST do Twojej funkcji Cloud Functions
       const response = await fetch('https://jointeam-ff4yiokesq-ey.a.run.app', {
@@ -66,7 +70,7 @@ export const UserTeamDataProvider = ({ children }) => {
         },
         body: JSON.stringify({
           accessCode: accessCode,
-          userUid: currentUser.uid,
+          userUid: userUid,
         }),
       });
 
@@ -77,6 +81,7 @@ export const UserTeamDataProvider = ({ children }) => {
         console.log('Success:', result);
         // Tutaj możesz przekierować użytkownika lub wyświetlić komunikat o sukcesie
         navigate(`/${result.teamId}/dashboard`);
+        setLastTeamId(result.teamId); // Ustawienie ostatniego ID zespołu
       } else {
         console.error('Error Response:', result);
         // Tutaj obsłuż błędy, np. wyświetlając komunikat
