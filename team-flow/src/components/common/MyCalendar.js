@@ -566,23 +566,29 @@ const Calendar = () => {
             }
         } else {
             // Handle dragging to calendar cells
-            const itemId = result.draggableId;
-            const cellId = destination.droppableId;
-            const itemType = source.droppableId; // 'shifts' or 'ooos'
+            if (destination.droppableId.includes('_')) {  // Check if the destination is a calendar cell
+                const itemId = result.draggableId;
+                const cellId = destination.droppableId;
+                const itemType = source.droppableId; // 'shifts', 'ooos', or 'vacations'
 
-            setCalendarShifts(prev => {
-                // Tworzenie lub aktualizacja wpisu z przeciągniętym elementem
-                const updatedShiftData = {
-                    // Pobieranie istniejących danych z prev[cellId], jeśli istnieją
-                    ...prev[cellId],
-                    [itemType === 'shifts' ? 'shiftId' : 'oooId']: itemId,
-                    vacationId: itemType === 'vacations' ? vacationItem.id : null,
-                    // Przypisanie daty na podstawie cellId
-                    date: cellId.split('_')[1] // zakładając, że cellId ma format 'userId_date'
-                };
+                setCalendarShifts(prev => {
+                    const updatedShiftData = { ...prev[cellId], date: cellId.split('_')[1] };
 
-                return { ...prev, [cellId]: updatedShiftData };
-            });
+                    if (itemType === 'vacations') {
+                        // Clear existing shift or OOO if a vacation item is dropped
+                        updatedShiftData.shiftId = null;
+                        updatedShiftData.oooId = null;
+                        updatedShiftData.vacationId = itemId;
+                    } else {
+                        // Add or update shift or OOO
+                        updatedShiftData[itemType === 'shifts' ? 'shiftId' : 'oooId'] = itemId;
+                        updatedShiftData.vacationId = null;
+                    }
+
+                    return { ...prev, [cellId]: updatedShiftData };
+                });
+            }
+
         }
 
 

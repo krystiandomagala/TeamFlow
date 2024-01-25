@@ -173,7 +173,7 @@ export default function TimeOff() {
                 <Button onClick={handleShow}>+ New Request</Button>
                 <div className="divider mb-3 mt-4">
                     <span>
-                        Time-off requests
+                        Time off requests
                     </span>
                 </div>
                 <div>
@@ -187,7 +187,7 @@ export default function TimeOff() {
                     )}
                     {requests.length < 1 && (
                         <div className="lack-of-data mt-3">
-                            No time-off requests in your team
+                            No time off requests in your team
                         </div>)}
                 </div>
                 <div className="divider mb-3 mt-4">
@@ -204,7 +204,7 @@ export default function TimeOff() {
                     )}
                     {currentUserRequests.length < 1 && (
                         <div className="lack-of-data mt-3">
-                            You don't have any time-off rquests
+                            You don't have any time off rquests
                         </div>)}
                 </div>
             </div>

@@ -39,6 +39,7 @@ h2 {
   text-align: center;
   object-fit: cover;
   transition: filter 0.15s ease-in-out;
+  aspect-ratio: 1/1;
   color: #fff;
 }
 
@@ -53,6 +54,7 @@ h2 {
   outline: white 4px solid;
   color: #fff;
   font-size: 0.7rem;
+  aspect-ratio: 1/1;
 }
 
 .avatar-large {
@@ -66,6 +68,9 @@ h2 {
   outline: white 4px solid;
   color: #fff;
   font-size: 5.5rem;
+  aspect-ratio: 1/1;
+
+
 }
 
 .avatar-mid {
@@ -79,6 +84,8 @@ h2 {
   object-fit: cover;
   color: #fff;
   font-size: 1.2rem;
+  aspect-ratio: 1/1;
+
 }
 
 .subtask-item .avatar-mini {

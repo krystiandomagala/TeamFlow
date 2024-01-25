@@ -36,7 +36,7 @@ export default function Message({ message }) {
         {message.image ? (
           <>
             <img className='message-img' src={message.image} onClick={handleImageClick} style={{ cursor: 'pointer' }} />
-            <Modal show={showModal} onHide={handleCloseModal} size="xl" centered>
+            <Modal show={showModal} onHide={handleCloseModal} centered>
               <Modal.Body>
                 <img src={message.image} className='img-fluid' alt='Chat Image' />
               </Modal.Body>

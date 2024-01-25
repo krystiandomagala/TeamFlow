@@ -26,10 +26,19 @@ export default function Team() {
   const [teamData, setTeamData] = useState(null);
   const { currentUser } = useAuth()
   const [searchQuery, setSearchQuery] = useState('');
+  const [networkError, setNetworkError] = useState(false);
 
   const navigate = useNavigate()
 
   const grantAdminPermissions = async (userId) => {
+    if (!navigator.onLine) {
+      setNetworkError(true);
+      setTimeout(() => setNetworkError(false), 5000); // Komunikat zniknie po 5 sekundach
+      return;
+    }
+
+    setNetworkError(false);
+
     if (!teamData.adminIds.includes(userId)) {
       const updatedAdminIds = [...teamData.adminIds, userId];
 
@@ -48,6 +57,14 @@ export default function Team() {
   };
 
   const revokeAdminPermissions = async (userId) => {
+    if (!navigator.onLine) {
+      setNetworkError(true);
+      setTimeout(() => setNetworkError(false), 5000); // Komunikat zniknie po 5 sekundach
+      return;
+    }
+
+    setNetworkError(false);
+
     if (teamData.adminIds.includes(userId)) {
       const updatedAdminIds = teamData.adminIds.filter(id => id !== userId);
 
@@ -75,6 +92,13 @@ export default function Team() {
   );
 
   const removeTeamMember = async (userId) => {
+    if (!navigator.onLine) {
+      setNetworkError(true);
+      setTimeout(() => setNetworkError(false), 5000); // Komunikat zniknie po 5 sekundach
+      return;
+    }
+
+    setNetworkError(false);
     // Logic to remove the user from the team
     // This could involve updating your database or state
 
@@ -241,6 +265,11 @@ export default function Team() {
         {showErrorSaveAlert && (
           <div className="alert alert-danger">
             Error saving the new code
+          </div>
+        )}
+        {networkError && (
+          <div className="alert alert-danger">
+            Task failed. Please check your network connection.
           </div>
         )}
       </div>

@@ -25,115 +25,88 @@ export const UserTeamDataProvider = ({ children }) => {
 
   // Asynchroniczna funkcja do tworzenia nowego zespołu
   const createTeam = async (teamName) => {
-    const userUid = currentUser.uid; // Zakładając, że currentUser to aktualnie zalogowany użytkownik
-
     try {
-      const response = await fetch('https://createteam-ff4yiokesq-ey.a.run.app', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          teamName: teamName,
-          userUid: userUid,
-        }),
+      // Dodanie nowego dokumentu do kolekcji 'teams'
+      const docRef = await addDoc(collection(db, 'teams'), {
+        name: teamName, // Nazwa zespołu
+        createdAt: serverTimestamp(), // Timestamp serwera
+        memberIds: [currentUser.uid], // ID użytkownika jako pierwszy członek
+        adminIds: [currentUser.uid], // ID użytkownika jako admin
+        accessCode: uuidv4(), // Wygenerowany unikalny kod dostępu
+      });
+      setLastTeamId(docRef.id); // Ustawienie ostatniego ID zespołu po stworzeniu nowego zespołu
+
+      await setDoc(doc(db, "userChats", currentUser.uid, "teamChats", docRef.id), {})
+      await setDoc(doc(db, 'teams', docRef.id, 'teamMembers', currentUser.uid), {
+        id: currentUser.uid
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('Team created with ID:', result.teamId);
-      setLastTeamId(result.teamId); // Ustawienie ostatniego ID zespołu
-
-      // Możesz tutaj dodać dodatkową logikę, na przykład przekierowanie użytkownika
     } catch (error) {
-      console.error('Error creating team:', error);
+      console.error('Error adding document: ', error); // Obsługa błędów
     }
   };
 
-
   // Asynchroniczna funkcja do dołączania do zespołu
-  // Funkcja, którą przypiszesz do przycisku 'Join Team' w Twoim komponencie React
   const joinTeam = async (accessCode) => {
-
-    const userUid = currentUser.uid; // Zakładając, że currentUser to aktualnie zalogowany użytkownik
-
-
     try {
-      // Wykonanie żądania HTTP POST do Twojej funkcji Cloud Functions
-      const response = await fetch('https://jointeam-ff4yiokesq-ey.a.run.app', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          accessCode: accessCode,
-          userUid: userUid,
-        }),
+      // Zapytanie o zespoły z podanym kodem dostępu
+      const teamsQuery = query(collection(db, 'teams'), where('accessCode', '==', accessCode));
+      const querySnapshot = await getDocs(teamsQuery);
+
+      // Sprawdzenie czy znaleziono zespół
+      if (querySnapshot.empty) {
+        alert('No team found with the given access code');
+        return;
+      }
+
+      // Aktualizacja dokumentu zespołu o nowego członka
+      const teamDoc = querySnapshot.docs[0];
+      await updateDoc(doc(db, 'teams', teamDoc.id), {
+        memberIds: arrayUnion(currentUser.uid),
       });
 
-      const result = await response.json(); // lub response.json() jeśli oczekiwany jest JSON
-      console.log(result.teamId)
+      await setDoc(doc(db, "userChats", currentUser.uid, "teamChats", teamDoc.id), {})
+      await setDoc(doc(db, 'teams', teamDoc.id, 'teamMembers', currentUser.uid), {
+        id: currentUser.uid
+      });
 
-      if (response.ok) {
-        console.log('Success:', result);
-        // Tutaj możesz przekierować użytkownika lub wyświetlić komunikat o sukcesie
-        navigate(`/${result.teamId}/dashboard`);
-        setLastTeamId(result.teamId); // Ustawienie ostatniego ID zespołu
-      } else {
-        console.error('Error Response:', result);
-        // Tutaj obsłuż błędy, np. wyświetlając komunikat
-      }
+      setLastTeamId(teamDoc.id); // Ustawienie ostatniego ID zespołu po dołączeniu
+      navigate(`/${teamDoc.id}/dashboard`); // Przeniesienie użytkownika do strony zespołu
     } catch (error) {
-      console.error('Error:', error);
-      // Tutaj obsłuż błędy związane z siecią lub innymi wyjątkami
+      console.error('Error joining team: ', error); // Obsługa błędów
     }
-
   };
 
   // Asynchroniczna funkcja do pobierania zespołów, do których należy użytkownik
   const getUserTeams = async () => {
-    const userUid = currentUser.uid; // Zakładając, że currentUser to aktualnie zalogowany użytkownik
-
     try {
-      const response = await fetch('https://getuserteams-ff4yiokesq-ey.a.run.app?userUid=' + encodeURIComponent(userUid), { // Zmień '/getUserTeams' na właściwy URL funkcji Cloud
-        method: 'GET'
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const teams = await response.json();
-      console.log(teams)
-      return teams;
+      // Zapytanie o zespoły, których członkiem jest użytkownik
+      const teamsQuery = query(collection(db, 'teams'), where('memberIds', 'array-contains', currentUser.uid));
+      const querySnapshot = await getDocs(teamsQuery);
+      return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
-      console.error('Error getting user teams:', error);
+      console.error('Error getting user teams: ', error); // Obsługa błędów
       return [];
     }
   };
 
-
+  // Asynchroniczna funkcja do pobierania danych zespołu, o id przekazanym jako argument
   const getTeamData = async (teamId) => {
     try {
-      const response = await fetch('https://getteamdata-ff4yiokesq-ey.a.run.app?teamId=' + encodeURIComponent(teamId), {
-        method: 'GET'
-      });
+      const teamDocRef = doc(db, 'teams', teamId); // Utworzenie referencji do dokumentu zespołu
+      const teamDocSnapshot = await getDoc(teamDocRef); // Pobranie snapshotu dokumentu
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (teamDocSnapshot.exists()) {
+        return { id: teamDocSnapshot.id, ...teamDocSnapshot.data() }; // Jeśli dokument istnieje, zwróć jego dane
+      } else {
+        console.error('No such team!');
+        return null; // Jeśli nie istnieje, zwróć null
       }
-
-      const teamData = await response.json();
-      return teamData;
     } catch (error) {
-      console.error('Error getting team data:', error);
-      return null;
+      console.error('Error getting team data: ', error);
+      return null; // W przypadku błędu, zwróć null
     }
   };
-
 
   async function isUserTeamAdmin(teamId) {
     const teamDocRef = doc(db, 'teams', teamId);

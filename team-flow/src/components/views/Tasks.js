@@ -48,6 +48,9 @@ export default function Tasks() {
   const [sortOptionTeam, setSortOptionTeam] = useState('deadline_asc');
   const [sortOptionYour, setSortOptionYour] = useState('deadline_asc');
   const [sortOptionPinned, setSortOptionPinned] = useState('deadline_asc');
+  const [validationErrors, setValidationErrors] = useState({});
+  const [showTaskAddedAlert, setShowTaskAddedAlert] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
 
   const sortTasks = (tasks, option) => {
     switch (option) {
@@ -220,9 +223,40 @@ export default function Tasks() {
 
 
   const handleSaveTask = async () => {
+
+    if (!navigator.onLine) {
+      setShowModal(false);
+      setNetworkError(true);
+      setTimeout(() => setNetworkError(false), 5000); // Komunikat zniknie po 5 sekundach
+      return;
+    }
+
+    setNetworkError(false);
     // Logika zapisywania zadania
     // Po zapisaniu możesz zamknąć modal lub zresetować stan strony
+    setValidationErrors({});
+    let errors = {};
+    if (!taskTitle.trim()) {
+      errors.taskTitle = 'Title is required';
+      setModalPage(1)
+    }
+    if (!taskDeadline) {
+      errors.taskDeadline = 'Deadline is required';
+      setModalPage(1)
+    }
 
+    // If there are errors, set them and stop the function
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+
+    // If there are errors, set them and stop the function
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
     const preparedSubtasks = subtasks.map(subtask => {
       return {
         ...subtask,
@@ -248,14 +282,21 @@ export default function Tasks() {
     try {
       await addDoc(collection(db, 'teams', teamId, 'tasks'), taskData);
       console.log('Task added successfully');
+
+      // Show success alert
+      setShowTaskAddedAlert(true);
+      setTimeout(() => setShowTaskAddedAlert(false), 2000); // Alert will disappear after 2 seconds
+
       sendTaskAssignmentNotifications(assignedUserIds, taskData);
 
     } catch (error) {
       console.error('Error adding task: ', error);
+      // You can also handle and show error alert here if needed
     }
+
     setShowModal(false);
     setModalPage(1);
-    resetForm()
+    resetForm();
   };
 
   if (isLoading) {
@@ -285,6 +326,19 @@ export default function Tasks() {
     return option ? option.label : 'Unknown';
   };
 
+  const handleTitleChange = (e) => {
+    setTaskTitle(e.target.value);
+    if (validationErrors.taskTitle) {
+      setValidationErrors({ ...validationErrors, taskTitle: null });
+    }
+  };
+  const handleDeadlineChange = (e) => {
+    setTaskDeadline(e.target.value);
+    if (validationErrors.taskDeadline) {
+      setValidationErrors({ ...validationErrors, taskDeadline: null });
+    }
+  };
+
   return (
     <MainLayout>
       <div className='my-3 pe-3 d-flex flex-column w-100' style={{ overflowY: 'auto' }}>
@@ -302,14 +356,15 @@ export default function Tasks() {
               modalPage === 1 ? (
                 <Form>
                   <Form.Group className="mb-3">
-                    <Form.Label>Title</Form.Label>
+                    <Form.Label>Title*</Form.Label>
                     <Form.Control
                       type="text"
                       placeholder="Enter task title"
                       value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
+                      onChange={handleTitleChange}
                       required
                     />
+                    {validationErrors.taskTitle && <div className="text-danger">{validationErrors.taskTitle}</div>}
                   </Form.Group>
                   <Form.Group className="mb-3">
                     <Form.Label>Description</Form.Label>
@@ -323,14 +378,15 @@ export default function Tasks() {
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Deadline</Form.Label>
+                    <Form.Label>Deadline*</Form.Label>
                     <Form.Control
                       type="date"
                       min={today}
                       value={taskDeadline}
-                      onChange={(e) => setTaskDeadline(e.target.value)}
+                      onChange={handleDeadlineChange} // Update this line
                       required
                     />
+                    {validationErrors.taskDeadline && <div className="text-danger">{validationErrors.taskDeadline}</div>}
                   </Form.Group>
 
                   <ToggleSwitch onChange={handlePriorityChange} />
@@ -512,6 +568,20 @@ export default function Tasks() {
             {isPinnedTasksExpanded ? <><ArrowUpIcon /> Show less </> : <> <ArrowDownIcon />Show more</>}
           </div>
         )}
+
+        <div className="alert-container" style={{ position: 'fixed', bottom: 20, right: 20 }}>
+          {/* ... other alerts ... */}
+          {showTaskAddedAlert && (
+            <div className="alert alert-success">
+              Task has been successfully added
+            </div>
+          )}
+          {networkError && (
+            <div className="alert alert-danger">
+              Failed to add task, please check your network connection.
+            </div>
+          )}
+        </div>
       </div>
     </MainLayout>
   );

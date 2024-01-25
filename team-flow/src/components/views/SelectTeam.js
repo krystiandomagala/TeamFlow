@@ -14,6 +14,7 @@ export default function SelectTeam() {
   const [showJoinTeamModal, setShowJoinTeamModal] = useState(false);
   const [teams, setTeams] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -33,6 +34,12 @@ export default function SelectTeam() {
 
   // Obsługa tworzenia nowego zespołu
   const handleCreateTeam = (e) => {
+    if (!navigator.onLine) {
+      setNetworkError(true);
+      setTimeout(() => setNetworkError(false), 5000); // Komunikat zniknie po 5 sekundach
+      return;
+    }
+
     e.preventDefault();
     createTeam(teamName).then(() => {
       setShowCreateTeamModal(false);
@@ -42,6 +49,12 @@ export default function SelectTeam() {
 
   // Obsługa dołączania do zespołu
   const handleJoinTeam = (e) => {
+    if (!navigator.onLine) {
+      setNetworkError(true);
+      setTimeout(() => setNetworkError(false), 5000); // Komunikat zniknie po 5 sekundach
+      return;
+    }
+
     e.preventDefault();
     joinTeam(accessCode).then(() => {
       setShowJoinTeamModal(false);
@@ -65,7 +78,11 @@ export default function SelectTeam() {
           <Button onClick={() => setShowCreateTeamModal(true)}>Create team</Button>
           <Button className='m-2' onClick={() => setShowJoinTeamModal(true)}>Join team</Button>
 
-          <h2>Your teams</h2>
+          <div className="divider mb-3 mt-4">
+            <span>
+              Your teams
+            </span>
+          </div>
           <div className='d-flex gap-3 py-3 teams-wrapper scrollbar'>
             {isLoading ? (
               <Spinner animation="border" variant="primary">
@@ -107,6 +124,13 @@ export default function SelectTeam() {
             onChange={setAccessCode}
             buttonText='Join team'
           />
+        </div>
+        <div className="alert-container" style={{ position: 'fixed', bottom: 20, right: 20 }}>
+          {networkError && (
+            <div className="alert alert-danger">
+              Task failed. Please check your network connection.
+            </div>
+          )}
         </div>
       </div>
     </>

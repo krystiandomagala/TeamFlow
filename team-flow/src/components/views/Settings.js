@@ -4,7 +4,7 @@ import AvatarLarge from '../common/AvatarLarge';
 import { Button, Form } from 'react-bootstrap';
 import { useAuth } from '../../contexts/AuthContext';
 import { storage } from '../../firebase';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useUser } from '../../contexts/UserContext';
@@ -25,6 +25,7 @@ export default function Settings() {
     const [uploaded, setUploaded] = useState(false)
     const [fullName, setFullName] = useState('');
     const [tempPreviewUrl, setTempPreviewUrl] = useState('')
+    const [photoToRemove, setPhotoToRemove] = useState(null);
 
     const toggleEditMode = () => {
         if (isEditMode) {
@@ -62,13 +63,17 @@ export default function Settings() {
         try {
             const updateData = { fullName: fullName }; // Always update fullName
 
-            if (image) {
+            if (photoToRemove) {
+                // Twórz referencję do zdjęcia w Storage
+                const imageRef = storageRef(storage, photoToRemove);
+                await deleteObject(imageRef); // Usuń zdjęcie
+                updateData.profilePhoto = null; // Usuń zdjęcie z profilu użytkownika
+            } else if (image) {
                 const imageRef = storageRef(storage, `profile_images/${currentUser.uid}/${image.name}`);
                 await uploadBytes(imageRef, image);
                 const url = await getDownloadURL(imageRef);
-                updateData.profilePhoto = url; // Update profilePhoto only if a new image is uploaded
+                updateData.profilePhoto = url;
             }
-
             await updateDoc(doc(db, 'users', currentUser.uid), updateData);
 
             window.location.reload();
@@ -84,7 +89,9 @@ export default function Settings() {
         setPreviewUrl(null);
         setTempPreviewUrl(null)
         setShowInitials(true); // Indicate that initials should be shown
+        setPhotoToRemove(user.profilePhoto); // Zapisz URL zdjęcia do usunięcia
     };
+
 
     return (
 

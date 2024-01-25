@@ -23,7 +23,7 @@ export default function TeamItem({ team }) {
     <Card className='team-item-container'>
       <Card.Header className='team-creation-date'>
         <div className='team-creation-date-header'>created at</div>
-        {formatDateFromSeconds(team.createdAt._seconds)}</Card.Header>
+        {formatDateFromSeconds(team.createdAt.seconds)}</Card.Header>
       <Card.Body>
         <Card.Title className='ellipsis team-item-header'>{team.name}</Card.Title>
         <hr className='team-card-divider' />

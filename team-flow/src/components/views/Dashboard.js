@@ -159,7 +159,7 @@ export default function Dashboard() {
             </Link>
           </Col>
           <Col md={12} lg={6} className='mt-3'>
-            <div className='widget-title mb-1'>Time-off requests</div>
+            <div className='widget-title mb-1'>Time off requests</div>
             <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div className='p-2 d-flex gap-2 flex-column rounded-4 tasks-widget' >
                 {isLoadingTimeOff && <div> test</div>}
