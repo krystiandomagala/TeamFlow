@@ -89,13 +89,16 @@ export default function SelectTeam() {
                 <span className="visually-hidden">Loading...</span>
               </Spinner>
             ) : (
-              teams.map((team) => (
-                <div key={team.id}>
-                  <Link to={`/${team.id}/dashboard`} style={{ textDecoration: 'none' }} onClick={() => handleSelectTeam(team.id)}>
-                    <TeamItem team={team} />
-                  </Link>
-                </div>
-              ))
+              <>
+                {teams.map((team) => (
+                  <div key={team.id}>
+                    <Link to={`/${team.id}/dashboard`} style={{ textDecoration: 'none' }} onClick={() => handleSelectTeam(team.id)}>
+                      <TeamItem team={team} />
+                    </Link>
+                  </div>
+                ))}
+                {!teams.length && (<div className='lack-of-data'>You are not a member of any team</div>)}
+              </>
             )}
           </div>
 

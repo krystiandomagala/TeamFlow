@@ -51,12 +51,24 @@ export default function Settings() {
 
     const handleImageChange = (e) => {
         if (e.target.files[0]) {
-            setImage(e.target.files[0]);
-            setTempPreviewUrl(URL.createObjectURL(e.target.files[0]));
-            setUploaded(true);
+            const file = e.target.files[0];
+            const allowedTypes = ['image/jpeg', 'image/png'];
+
+            if (allowedTypes.includes(file.type)) {
+                setImage(file);
+                setTempPreviewUrl(URL.createObjectURL(file));
+                setUploaded(true);
+            } else {
+                alert("Please upload an image file (e.g., jpg, png, gif, svg, webp).");
+                // Opcjonalnie: wyczyść pole wyboru pliku, jeśli plik jest nieprawidłowy
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+                setUploaded(false);
+                setTempPreviewUrl('');
+            }
         }
     };
-
     const handleSave = async () => {
         setIsLoading(true);
 

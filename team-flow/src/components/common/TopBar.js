@@ -26,6 +26,22 @@ export default function TopBar() {
   const [loadingMore, setLoadingMore] = useState(false);
   const notificationsMenuRef = useRef(null);
 
+  const markAllNotificationsAsRead = async () => {
+    const notificationsRef = collection(db, 'teams', teamId, 'teamMembers', currentUser.uid, 'notifications');
+    const q = query(notificationsRef, where('isRead', '==', false));
+
+    const querySnapshot = await getDocs(q);
+    const batch = writeBatch(db);
+
+    querySnapshot.forEach(doc => {
+      batch.update(doc.ref, { isRead: true });
+    });
+
+    await batch.commit();
+    setUnreadNotificationsCount(0);
+  };
+
+
   useEffect(() => {
     // Funkcja sprawdzająca, czy kliknięcie było poza menu
     const handleClickOutside = async (event) => {
@@ -215,7 +231,7 @@ export default function TopBar() {
                         <div key={index}>
                           {
                             notification.type === 'schedule' && (
-                              <Link to={`/${teamId}/schedule`} style={{ textDecoration: 'none' }}>
+                              <Link to={`/${teamId}/schedule`} style={{ textDecoration: 'none' }} onClick={markAllNotificationsAsRead}>
                                 <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
                                   <div className='d-flex align-items-center justify-content-between'>
                                     <div className='d-flex gap-2 align-items-center notification-container'>
@@ -233,7 +249,7 @@ export default function TopBar() {
                           }
                           {
                             notification.type === 'time-off-request' && (
-                              <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none' }} >
+                              <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none' }} onClick={markAllNotificationsAsRead}>
                                 <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
                                   <div className='d-flex align-items-center justify-content-between'>
                                     <div className='d-flex gap-2 align-items-center notification-container'>
@@ -251,7 +267,7 @@ export default function TopBar() {
                           }
                           {
                             notification.type === 'time-off-status-update' && (
-                              <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none' }} >
+                              <Link to={`/${teamId}/schedule/time-off-requests`} style={{ textDecoration: 'none' }} onClick={markAllNotificationsAsRead}>
                                 <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
                                   <div className='d-flex align-items-center justify-content-between'>
                                     <div className='d-flex gap-2 align-items-center notification-container'>
@@ -269,7 +285,7 @@ export default function TopBar() {
                           }
                           {
                             notification.type === 'task-assignment' && (
-                              <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} >
+                              <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} onClick={markAllNotificationsAsRead}>
                                 <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
                                   <div className='d-flex align-items-center justify-content-between'>
                                     <div className='d-flex gap-2 align-items-center notification-container'>
@@ -287,7 +303,7 @@ export default function TopBar() {
                           }
                           {
                             notification.type === 'task-update' && (
-                              <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} >
+                              <Link to={`/${teamId}/tasks`} style={{ textDecoration: 'none' }} onClick={markAllNotificationsAsRead}>
                                 <div className={`py-2 px-3 border-bottom notification-item ${!notification.isRead ? 'unread-notification' : ''}`}>
                                   <div className='d-flex align-items-center justify-content-between'>
                                     <div className='d-flex gap-2 align-items-center notification-container'>
